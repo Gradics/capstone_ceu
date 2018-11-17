@@ -1,0 +1,296 @@
+-- v07_031_Population_Events_Ever
+-- select count(*) from [Gabor.v07_031_Population_Events_Ever]
+
+
+SELECT ID
+
+, COUNT(DISTINCT MONTH(A_Date)) AS MTH_DISTINCT
+
+, MIN(A_visitNumber) AS MIN_visitNumber
+, MAX(A_visitNumber) AS MAX_visitNumber
+
+, MIN(A_hit_visitStartTime) AS MIN_date
+, MAX(A_hit_visitStartTime) AS MAX_date
+, DATEDIFF(MAX(A_hit_visitStartTime), MIN(A_hit_visitStartTime)) AS DDIFF
+
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ReszletekOldalMegjelenes' THEN 1 ELSE 0 END) ReszletekOldalMegjelenes
+, SUM(CASE WHEN DimHirdetesEladasmodja = 'Eladó' THEN 1 ELSE 0 END) AS HirdetesEladasmodja_Elado
+, SUM(CASE WHEN DimHirdetesTipus IN ('ház', 'lakás', 'nyaraló', 'garázs', 'telek') THEN 1 ELSE 0 END) AS HirdetesTipus_Lakossag
+
+, SUM(CASE WHEN DimBejelentkezve = 'Magan' THEN 1 ELSE 0 END) AS Bejelentkezve_Magan
+, SUM(CASE WHEN DimBejelentkezve = 'Office' THEN 1 ELSE 0 END) AS Bejelentkezve_Office
+, SUM(CASE WHEN DimFelhasznalo = 'Maganhirdeto' THEN 1 ELSE 0 END) AS Felhasznalo_Magan
+, SUM(CASE WHEN DimFelhasznalo = 'office' THEN 1 ELSE 0 END) AS Felhasznalo_Office
+--------------------------
+, max(A_visitNumber) - min(A_visitNumber) AS Visits
+, sum((A_totals_hits)) AS hits
+, sum((A_totals_pageviews)) AS pageviews
+, sum((A_totals_timeOnSite)) AS timeOnSite
+--honnan hova keres?
+, SUM(CASE WHEN A_geoNetwork_country LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Honnan_Hungary
+, SUM(CASE WHEN A_geoNetwork_country NOT LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Honnan_Kulfold
+, SUM(CASE WHEN A_hits_page_pageTitle LIKE '%Budapest%' AND A_geoNetwork_city LIKE '%Budapest%' THEN 1 ELSE 0 END) AS Budapestrol_Budapestre
+, SUM(CASE WHEN A_hits_page_pageTitle LIKE '%Budapest%' AND A_geoNetwork_city NOT LIKE '%Budapest%' AND A_geoNetwork_country LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Videkrol_Budapestre
+, SUM(CASE WHEN A_hits_page_pageTitle LIKE '%Budapest%' AND A_geoNetwork_city NOT LIKE '%Budapest%' AND A_geoNetwork_country NOT LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Kulfoldrol_Budapestre
+-- channel
+, SUM(CASE WHEN A_channelGrouping = 'Direct' THEN 1 ELSE 0 END) AS channel_Direct
+, SUM(CASE WHEN A_channelGrouping = 'Display' THEN 1 ELSE 0 END) AS channel_Display
+, SUM(CASE WHEN A_channelGrouping = 'Email' THEN 1 ELSE 0 END) AS channel_Email
+, SUM(CASE WHEN A_channelGrouping = 'Organic Search' THEN 1 ELSE 0 END) AS channel_Organic_Search
+, SUM(CASE WHEN A_channelGrouping = 'Paid Search' THEN 1 ELSE 0 END) AS channel_Paid_Search
+, SUM(CASE WHEN A_channelGrouping = 'Referral' THEN 1 ELSE 0 END) AS channel_Referral
+, SUM(CASE WHEN A_channelGrouping = 'Social' THEN 1 ELSE 0 END) AS channel_Social
+-- other
+, SUM(CASE WHEN A_hits_social_socialNetwork IN ('Facebook', 'Facebook Apps') THEN 1 ELSE 0 END) AS socialNetwork_Facebook
+, SUM(CASE WHEN A_hits_social_hasSocialSourceReferral IN ('Yes') THEN 1 ELSE 0 END) AS SocialSourceReferral
+-- referer
+, SUM(CASE WHEN A_hits_referer LIKE '%google%' THEN 1 ELSE 0 END) AS referer_google
+, SUM(CASE WHEN A_hits_referer LIKE '%facebook%' THEN 1 ELSE 0 END) AS referer_facebook
+, SUM(CASE WHEN A_hits_referer LIKE '%ingatlan.com%' THEN 1 ELSE 0 END) AS referer_icom
+, SUM(CASE WHEN A_hits_referer LIKE '%freemail.hu%' THEN 1 ELSE 0 END) AS referer_freemail
+, SUM(CASE WHEN A_hits_referer LIKE '%indamail.hu%' THEN 1 ELSE 0 END) AS referer_indamail
+, SUM(CASE WHEN A_hits_referer LIKE '%citromail.hu%' THEN 1 ELSE 0 END) AS referer_citromail
+, SUM(CASE WHEN A_hits_referer LIKE '%ams.creativecdn.com/imp-delivery%' THEN 1 ELSE 0 END) AS referer_creativecdn
+-- trafficSource_source	trafficSource_medium
+, SUM(CASE WHEN A_trafficSource_source = 'google' AND A_trafficSource_medium = 'cpc' THEN 1 ELSE 0 END) AS trafficSource_google_cpc
+, SUM(CASE WHEN A_trafficSource_source = 'google' AND A_trafficSource_medium = 'organic' THEN 1 ELSE 0 END) AS trafficSource_google_organic
+, SUM(CASE WHEN A_trafficSource_source = 'Hirdetesfigyelo' AND A_trafficSource_medium = 'email' THEN 1 ELSE 0 END) AS trafficSource_Hirdetesfigyelo_email
+, SUM(CASE WHEN A_trafficSource_source IN ('m.facebook.com', 'facebook.com', 'l.facebook.com') AND A_trafficSource_medium = 'referral' THEN 1 ELSE 0 END) AS trafficSource_facebook_referral
+, SUM(CASE WHEN A_trafficSource_source = 'rtbhouse' AND A_trafficSource_medium = 'retargeting' THEN 1 ELSE 0 END) AS trafficSource_rtbhouse_retargeting
+, SUM(CASE WHEN A_trafficSource_source IN ('m.ingatlan.com', 'ingatlan.com') AND A_trafficSource_medium = 'referral' THEN 1 ELSE 0 END) AS trafficSource_icom_referral
+, SUM(CASE WHEN A_trafficSource_source = 'szemezgeto_auto' AND A_trafficSource_medium = 'CT' THEN 1 ELSE 0 END) AS trafficSource_szemezgeto_auto_CT
+, SUM(CASE WHEN A_trafficSource_source = 'automatamailek' AND A_trafficSource_medium = 'email' THEN 1 ELSE 0 END) AS trafficSource_automatamailek_email
+, SUM(CASE WHEN A_trafficSource_source = 'index.hu' AND A_trafficSource_medium = 'referral' THEN 1 ELSE 0 END) AS trafficSource_index_referral
+, SUM(CASE WHEN A_trafficSource_source = 'facebook' AND A_trafficSource_medium = 'cpm' THEN 1 ELSE 0 END) AS trafficSource_facebook_cpm
+, SUM(CASE WHEN A_trafficSource_source = 'Arfigyelo' AND A_trafficSource_medium = 'email' THEN 1 ELSE 0 END) AS trafficSource_Arfigyelo_email
+, SUM(CASE WHEN A_trafficSource_source = 'mail.google.com' AND A_trafficSource_medium = 'referral' THEN 1 ELSE 0 END) AS trafficSource_google_referral
+, SUM(CASE WHEN A_trafficSource_source = 'facebook' AND A_trafficSource_medium = 'ingatlan.com' THEN 1 ELSE 0 END) AS trafficSource_facebook_icom
+
+-- deviceCategory
+, SUM(CASE WHEN A_device_deviceCategory	= 'mobile' THEN 1 ELSE 0 END) AS device_mobile
+, SUM(CASE WHEN A_device_deviceCategory	= 'desktop' THEN 1 ELSE 0 END) AS device_desktop
+, SUM(CASE WHEN A_device_deviceCategory	= 'tablet' THEN 1 ELSE 0 END) AS device_tablet
+
+-- eventCategory
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'addthis' THEN 1 ELSE 0 END) AS event_addthis
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'AI' THEN 1 ELSE 0 END) AS event_AI
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'autosuggest' THEN 1 ELSE 0 END) AS event_autosuggest
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'bejelentkezes' THEN 1 ELSE 0 END) AS event_bejelentkezes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'BR_icom_kolcson' THEN 1 ELSE 0 END) AS event_BR_icom_kolcson
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Cart' THEN 1 ELSE 0 END) AS event_Cart
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Dashboard' THEN 1 ELSE 0 END) AS event_Dashboard
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ElkuldomEmailben' THEN 1 ELSE 0 END) AS event_ElkuldomEmailben
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ElrejtettHirdetesek' THEN 1 ELSE 0 END) AS event_ElrejtettHirdetesek
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Erdeklodes' THEN 1 ELSE 0 END) AS event_Erdeklodes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ErdeklodesEmail' THEN 1 ELSE 0 END) AS event_ErdeklodesEmail
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ErdeklodesLenti' THEN 1 ELSE 0 END) AS event_ErdeklodesLenti
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ErdeklodesOffice' THEN 1 ELSE 0 END) AS event_ErdeklodesOffice
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Eszkoztar' THEN 1 ELSE 0 END) AS event_Eszkoztar
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ET' THEN 1 ELSE 0 END) AS event_ET
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'FG-ID' THEN 1 ELSE 0 END) AS event_FGID
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Frontend - Lista oldali shs' THEN 1 ELSE 0 END) AS event_FrontendListaoldalishs
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'FrontendBelepes' THEN 1 ELSE 0 END) AS event_FrontendBelepes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'FrontendBelepesM1X' THEN 1 ELSE 0 END) AS event_FrontendBelepesM1X
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'FrontendRegisztracio' THEN 1 ELSE 0 END) AS event_FrontendRegisztracio
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Hirdetesfigyelo' THEN 1 ELSE 0 END) AS event_Hirdetesfigyelo
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'hirlevelFeliratkozas' THEN 1 ELSE 0 END) AS event_hirlevelFeliratkozas
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Kepgaleria' THEN 1 ELSE 0 END) AS event_Kepgaleria
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'keremAzAjandekTablat' THEN 1 ELSE 0 END) AS event_keremAzAjandekTablat
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Kereses' THEN 1 ELSE 0 END) AS event_Kereses
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Kereso' THEN 1 ELSE 0 END) AS event_Kereso
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Konferencia' THEN 1 ELSE 0 END) AS event_Konferencia
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'lakoparkKattintas' THEN 1 ELSE 0 END) AS event_lakoparkKattintas
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'lakoparkLead' THEN 1 ELSE 0 END) AS event_lakoparkLead
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'lakoparkListaKattintas' THEN 1 ELSE 0 END) AS event_lakoparkListaKattintas
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'lakoparkMegjelenes' THEN 1 ELSE 0 END) AS event_lakoparkMegjelenes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'lakoparkTelefonszam' THEN 1 ELSE 0 END) AS event_lakoparkTelefonszam
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'lead' THEN 1 ELSE 0 END) AS event_lead
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Licit' THEN 1 ELSE 0 END) AS event_Licit
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'M1X' THEN 1 ELSE 0 END) AS event_M1X
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'magan' THEN 1 ELSE 0 END) AS event_magan
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Maganhirdeto Infok' THEN 1 ELSE 0 END) AS event_MaganhirdetoInfok
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'MaganRegisztracio' THEN 1 ELSE 0 END) AS event_MaganRegisztracio
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'maganTabKattintas' THEN 1 ELSE 0 END) AS event_maganTabKattintas
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'MagánToDo' THEN 1 ELSE 0 END) AS event_MaganToDo
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'megrendelemATablat' THEN 1 ELSE 0 END) AS event_megrendelemATablat
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Mentes' THEN 1 ELSE 0 END) AS event_Mentes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Mobil - Erdeklodes box' THEN 1 ELSE 0 END) AS event_MobilErdeklodesbox
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Mobil elhelyezkedés' THEN 1 ELSE 0 END) AS event_Mobilelhelyezkedes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Mobil lista' THEN 1 ELSE 0 END) AS event_Mobillista
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Mobil részletek' THEN 1 ELSE 0 END) AS event_Mobilreszletek
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Moderalas' THEN 1 ELSE 0 END) AS event_Moderalas
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Nincs talalat - frontend' THEN 1 ELSE 0 END) AS event_Nincstalalatfrontend
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Nincs talalat - mobile' THEN 1 ELSE 0 END) AS event_Nincstalalatmobile
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Nincs találat - office' THEN 1 ELSE 0 END) AS event_Nincstalalatoffice
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Nincs talalat - origo' THEN 1 ELSE 0 END) AS event_Nincstalalatorigo
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Nincs talalat - szuperingatlan' THEN 1 ELSE 0 END) AS event_Nincstalalatszuperingatlan
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Nincs talalat - toplak' THEN 1 ELSE 0 END) AS event_Nincstalalattoplak
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Office' THEN 1 ELSE 0 END) AS event_Office
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Office_AI' THEN 1 ELSE 0 END) AS event_Office_AI
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'OfficeLogo' THEN 1 ELSE 0 END) AS event_OfficeLogo
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'OfficeUzenobox' THEN 1 ELSE 0 END) AS event_OfficeUzenobox
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Payment' THEN 1 ELSE 0 END) AS event_Payment
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Piac' THEN 1 ELSE 0 END) AS event_Piac
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Product detail view' THEN 1 ELSE 0 END) AS event_Productdetailview
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'ReszletekOldalMegjelenes' THEN 1 ELSE 0 END) AS event_ReszletekOldalMegjelenes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'telszamFelfedes' THEN 1 ELSE 0 END) AS event_telszamFelfedes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Torolt hirdetesek' THEN 1 ELSE 0 END) AS event_Torolthirdetesek
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'uj_bejelentkezes' THEN 1 ELSE 0 END) AS event_uj_bejelentkezes
+  , SUM(CASE WHEN A_hits_eventInfo_eventCategory = 'Uzenofal' THEN 1 ELSE 0 END) AS event_Uzenofal
+-- eventAction 
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'Action' THEN 1 ELSE 0 END) AS action_Dashboard_Action
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'UzenetGombok' THEN 1 ELSE 0 END) AS action_Dashboard_UzenetGombok
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' THEN 1 ELSE 0 END) AS action_Dashboard_kattintas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ET') AND A_hits_eventInfo_eventAction = 'elkuld' THEN 1 ELSE 0 END) AS action_ET_elkuld
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ET') AND A_hits_eventInfo_eventAction = 'megrendelem' THEN 1 ELSE 0 END) AS action_ET_megrendelem
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ET') AND A_hits_eventInfo_eventAction = 'visszahivastKerek' THEN 1 ELSE 0 END) AS action_ET_visszahivastKerek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElkuldomEmailben') AND A_hits_eventInfo_eventAction = 'SikeresKuldes' THEN 1 ELSE 0 END) AS action_ElkuldomEmailben_SikeresKuldes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElkuldomEmailben') AND A_hits_eventInfo_eventAction = 'megnyitas' THEN 1 ELSE 0 END) AS action_ElkuldomEmailben_megnyitas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'elrejtes' THEN 1 ELSE 0 END) AS action_ElrejtettHirdetesek_elrejtes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'megjelenites' THEN 1 ELSE 0 END) AS action_ElrejtettHirdetesek_megjelenites
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'E-mail' THEN 1 ELSE 0 END) AS action_Erdeklodes_Email
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'MaganFizetos' THEN 1 ELSE 0 END) AS action_Erdeklodes_MaganFizetos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'MaganIngyenes' THEN 1 ELSE 0 END) AS action_Erdeklodes_MaganIngyenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'OfficeNemUtcapontos' THEN 1 ELSE 0 END) AS action_Erdeklodes_OfficeNemUtcapontos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'OfficeUtcapontos' THEN 1 ELSE 0 END) AS action_Erdeklodes_OfficeUtcapontos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'frontEndMobile' THEN 1 ELSE 0 END) AS action_Erdeklodes_frontEndMobile
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'office' THEN 1 ELSE 0 END) AS action_Erdeklodes_office
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Erdeklodes') AND A_hits_eventInfo_eventAction = 'undefined' THEN 1 ELSE 0 END) AS action_Erdeklodes_undefined
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesEmail') AND A_hits_eventInfo_eventAction = 'frontend' THEN 1 ELSE 0 END) AS action_ErdeklodesEmail_frontend
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesEmail') AND A_hits_eventInfo_eventAction = 'mobile' THEN 1 ELSE 0 END) AS action_ErdeklodesEmail_mobile
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesEmail') AND A_hits_eventInfo_eventAction = 'origo' THEN 1 ELSE 0 END) AS action_ErdeklodesEmail_origo
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesEmail') AND A_hits_eventInfo_eventAction = 'szuperingatlan' THEN 1 ELSE 0 END) AS action_ErdeklodesEmail_szuperingatlan
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesEmail') AND A_hits_eventInfo_eventAction = 'toplak' THEN 1 ELSE 0 END) AS action_ErdeklodesEmail_toplak
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesLenti') AND A_hits_eventInfo_eventAction = 'TelefonszamFelfedes' THEN 1 ELSE 0 END) AS action_ErdeklodesLenti_TelefonszamFelfedes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesLenti') AND A_hits_eventInfo_eventAction = 'Uzenetkuldes' THEN 1 ELSE 0 END) AS action_ErdeklodesLenti_Uzenetkuldes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'MaganFizetos' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_MaganFizetos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'MaganFizetosEmail' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_MaganFizetosEmail
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'MaganIngyenes' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_MaganIngyenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'MaganIngyenesEmail' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_MaganIngyenesEmail
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'OfficeNemUtcapontos' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_OfficeNemUtcapontos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'OfficeNemUtcapontosEmail' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_OfficeNemUtcapontosEmail
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'OfficeUtcapontos' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_OfficeUtcapontos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ErdeklodesOffice') AND A_hits_eventInfo_eventAction = 'OfficeUtcapontosEmail' THEN 1 ELSE 0 END) AS action_ErdeklodesOffice_OfficeUtcapontosEmail
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' THEN 1 ELSE 0 END) AS action_Eszkoztar_Kattintas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Sikeres' THEN 1 ELSE 0 END) AS action_Eszkoztar_Sikeres
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Frontend - Lista oldali shs') AND A_hits_eventInfo_eventAction = 'Elrejtetett hirdetesek' THEN 1 ELSE 0 END) AS action_FrontendListaoldalishs_Elrejtetetthirdetesek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Frontend - Lista oldali shs') AND A_hits_eventInfo_eventAction = 'Mentett hirdetesek' THEN 1 ELSE 0 END) AS action_FrontendListaoldalishs_Mentetthirdetesek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Megjelenes' THEN 1 ELSE 0 END) AS action_FrontendBelepes_Megjelenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Sikeres' THEN 1 ELSE 0 END) AS action_FrontendBelepes_Sikeres
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendRegisztracio') AND A_hits_eventInfo_eventAction = 'Megjelenes' THEN 1 ELSE 0 END) AS action_FrontendRegisztracio_Megjelenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendRegisztracio') AND A_hits_eventInfo_eventAction = 'Sikeres' THEN 1 ELSE 0 END) AS action_FrontendRegisztracio_Sikeres
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Hirdetesfigyelo') AND A_hits_eventInfo_eventAction = 'Reszletekoldal' THEN 1 ELSE 0 END) AS action_Hirdetesfigyelo_Reszletekoldal
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Hirdetesfigyelo') AND A_hits_eventInfo_eventAction = 'Talalatioldal' THEN 1 ELSE 0 END) AS action_Hirdetesfigyelo_Talalatioldal
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Hirdetesfigyelo') AND A_hits_eventInfo_eventAction = 'TalalatioldalMobil' THEN 1 ELSE 0 END) AS action_Hirdetesfigyelo_TalalatioldalMobil
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Kereses') AND A_hits_eventInfo_eventAction = 'címlap' THEN 1 ELSE 0 END) AS action_Kereses_cimlap
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Kereses') AND A_hits_eventInfo_eventAction = 'mobil' THEN 1 ELSE 0 END) AS action_Kereses_mobil
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Kereses') AND A_hits_eventInfo_eventAction = 'szukites' THEN 1 ELSE 0 END) AS action_Kereses_szukites
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Kereses') AND A_hits_eventInfo_eventAction = 'ujEpitesuSzuro' THEN 1 ELSE 0 END) AS action_Kereses_ujEpitesuSzuro
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Kereso') AND A_hits_eventInfo_eventAction = 'ReszletesSzukitoLenyit' THEN 1 ELSE 0 END) AS action_Kereso_ReszletesSzukitoLenyit
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Kereso') AND A_hits_eventInfo_eventAction = 'VarosreszValasztas' THEN 1 ELSE 0 END) AS action_Kereso_VarosreszValasztas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('M1X') AND A_hits_eventInfo_eventAction = 'Lista-switch' THEN 1 ELSE 0 END) AS action_M1X_Listaswitch
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('M1X') AND A_hits_eventInfo_eventAction = 'Tovabbi hirdetesek' THEN 1 ELSE 0 END) AS action_M1X_Tovabbihirdetesek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('M1X') AND A_hits_eventInfo_eventAction = 'talalkozottDuplikaltHirdetessel' THEN 1 ELSE 0 END) AS action_M1X_talalkozottDuplikaltHirdetessel
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('MaganRegisztracio') AND A_hits_eventInfo_eventAction = 'Sikeres' THEN 1 ELSE 0 END) AS action_MaganRegisztracio_Sikeres
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('MaganRegisztracio') AND A_hits_eventInfo_eventAction = 'Tovabb' THEN 1 ELSE 0 END) AS action_MaganRegisztracio_Tovabb
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('MagánToDo') AND A_hits_eventInfo_eventAction = 'Elhalasztás' THEN 1 ELSE 0 END) AS action_MaganToDo_Elhalasztas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('MagánToDo') AND A_hits_eventInfo_eventAction = 'Megjelenés' THEN 1 ELSE 0 END) AS action_MaganToDo_Megjelenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('MagánToDo') AND A_hits_eventInfo_eventAction = 'Tovább' THEN 1 ELSE 0 END) AS action_MaganToDo_Tovabb
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('MagánToDo') AND A_hits_eventInfo_eventAction = 'Törlés' THEN 1 ELSE 0 END) AS action_MaganToDo_Torles
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mentes') AND A_hits_eventInfo_eventAction = 'Sikeres' THEN 1 ELSE 0 END) AS action_Mentes_Sikeres
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mentes') AND A_hits_eventInfo_eventAction = 'Torles' THEN 1 ELSE 0 END) AS action_Mentes_Torles
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil - Erdeklodes box') AND A_hits_eventInfo_eventAction = 'Mail-Open' THEN 1 ELSE 0 END) AS action_MobilErdeklodesbox_MailOpen
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil - Erdeklodes box') AND A_hits_eventInfo_eventAction = 'Open' THEN 1 ELSE 0 END) AS action_MobilErdeklodesbox_Open
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil elhelyezkedés') AND A_hits_eventInfo_eventAction = 'Autocomplete megjelenik' THEN 1 ELSE 0 END) AS action_Mobilelhelyezkedes_Autocompletemegjelenik
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil elhelyezkedés') AND A_hits_eventInfo_eventAction = 'Linket használt' THEN 1 ELSE 0 END) AS action_Mobilelhelyezkedes_Linkethasznalt
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil lista') AND A_hits_eventInfo_eventAction = 'Header menü' THEN 1 ELSE 0 END) AS action_Mobillista_Headermenu
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil lista') AND A_hits_eventInfo_eventAction = 'Szûkítõre kattintás' THEN 1 ELSE 0 END) AS action_Mobillista_Szukitorekattintas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil részletek') AND A_hits_eventInfo_eventAction = 'Kepgaleria' THEN 1 ELSE 0 END) AS action_Mobilreszletek_Kepgaleria
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil részletek') AND A_hits_eventInfo_eventAction = 'Teljes leírás' THEN 1 ELSE 0 END) AS action_Mobilreszletek_Teljesleiras
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Mobil részletek') AND A_hits_eventInfo_eventAction = 'Térképre kattintás - bezárás' THEN 1 ELSE 0 END) AS action_Mobilreszletek_Terkeprekattintasbezaras
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office') AND A_hits_eventInfo_eventAction = 'Header menü' THEN 1 ELSE 0 END) AS action_Office_Headermenu
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office') AND A_hits_eventInfo_eventAction = 'Hirdlista' THEN 1 ELSE 0 END) AS action_Office_Hirdlista
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office') AND A_hits_eventInfo_eventAction = 'Modositas' THEN 1 ELSE 0 END) AS action_Office_Modositas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office') AND A_hits_eventInfo_eventAction = 'Site menu' THEN 1 ELSE 0 END) AS action_Office_Sitemenu
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('OfficeLogo') AND A_hits_eventInfo_eventAction = 'IcomReszletekFent' THEN 1 ELSE 0 END) AS action_OfficeLogo_IcomReszletekFent
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('OfficeLogo') AND A_hits_eventInfo_eventAction = 'IcomReszletekLent' THEN 1 ELSE 0 END) AS action_OfficeLogo_IcomReszletekLent
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('OfficeLogo') AND A_hits_eventInfo_eventAction = 'ListaListaElem' THEN 1 ELSE 0 END) AS action_OfficeLogo_ListaListaElem
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Erdeklodes_Telefonszam' THEN 1 ELSE 0 END) AS action_Office_AI_Erdeklodes_Telefonszam
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Erdeklodes_Uzenet' THEN 1 ELSE 0 END) AS action_Office_AI_Erdeklodes_Uzenet
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Erdeklodes_Uzenet_TesztB' THEN 1 ELSE 0 END) AS action_Office_AI_Erdeklodes_Uzenet_TesztB
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Nps_Form_Bezaras' THEN 1 ELSE 0 END) AS action_Office_AI_Nps_Form_Bezaras
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Nps_Form_Kitoltes' THEN 1 ELSE 0 END) AS action_Office_AI_Nps_Form_Kitoltes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Nps_Form_Megjelenites' THEN 1 ELSE 0 END) AS action_Office_AI_Nps_Form_Megjelenites
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Regisztráció_submit' THEN 1 ELSE 0 END) AS action_Office_AI_Regisztracio_submit
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Office_AI') AND A_hits_eventInfo_eventAction = 'Sikeres belépés' THEN 1 ELSE 0 END) AS action_Office_AI_Sikeresbelepes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'forró piac' THEN 1 ELSE 0 END) AS action_Piac_forropiac
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'illikvid piac' THEN 1 ELSE 0 END) AS action_Piac_illikvidpiac
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'likvid piac' THEN 1 ELSE 0 END) AS action_Piac_likvidpiac
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'undefined' THEN 1 ELSE 0 END) AS action_Piac_undefined
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('addthis') AND A_hits_eventInfo_eventAction = 'facebook' THEN 1 ELSE 0 END) AS action_addthis_facebook
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('addthis') AND A_hits_eventInfo_eventAction = 'mailto' THEN 1 ELSE 0 END) AS action_addthis_mailto
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('addthis') AND A_hits_eventInfo_eventAction = 'messenger' THEN 1 ELSE 0 END) AS action_addthis_messenger
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('addthis') AND A_hits_eventInfo_eventAction = 'twitter' THEN 1 ELSE 0 END) AS action_addthis_twitter
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('bankracio') AND A_hits_eventInfo_eventAction = 'megjelenes' THEN 1 ELSE 0 END) AS action_bankracio_megjelenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('maganTabKattintas') AND A_hits_eventInfo_eventAction = '12mFtalatt' THEN 1 ELSE 0 END) AS action_maganTabKattintas_12mFtalatt
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('maganTabKattintas') AND A_hits_eventInfo_eventAction = '12mFtfelett' THEN 1 ELSE 0 END) AS action_maganTabKattintas_12mFtfelett
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('maganTabKattintas') AND A_hits_eventInfo_eventAction = 'egyeb' THEN 1 ELSE 0 END) AS action_maganTabKattintas_egyeb
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('maganTabKattintas') AND A_hits_eventInfo_eventAction = 'megyeszekhely' THEN 1 ELSE 0 END) AS action_maganTabKattintas_megyeszekhely
+
+-- eventLabel
+
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Cart') AND A_hits_eventInfo_eventAction = 'Click' AND A_hits_eventInfo_eventLabel = 'Add to cart' THEN 1 ELSE 0 END) AS label_Cart_Click_Addtocart
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Cart') AND A_hits_eventInfo_eventAction = 'Click' AND A_hits_eventInfo_eventLabel = 'Remove from cart' THEN 1 ELSE 0 END) AS label_Cart_Click_Removefromcart
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'Action' AND A_hits_eventInfo_eventLabel = 'Aktivalom a hirdetest' THEN 1 ELSE 0 END) AS label_Dashboard_Action_Aktivalomahirdetest
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'Action' AND A_hits_eventInfo_eventLabel = 'Leveszem a hirdetesem' THEN 1 ELSE 0 END) AS label_Dashboard_Action_Leveszemahirdetesem
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'UzenetGombok' AND A_hits_eventInfo_eventLabel = 'Elkuldom' THEN 1 ELSE 0 END) AS label_Dashboard_UzenetGombok_Elkuldom
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'UzenetGombok' AND A_hits_eventInfo_eventLabel = 'Megnyitom' THEN 1 ELSE 0 END) AS label_Dashboard_UzenetGombok_Megnyitom
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'UzenetGombok' AND A_hits_eventInfo_eventLabel = 'Valaszolok' THEN 1 ELSE 0 END) AS label_Dashboard_UzenetGombok_Valaszolok
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'grafikon_kedvencek' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_grafikon_kedvencek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'grafikon_latogatottsag' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_grafikon_latogatottsag
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'grafikon_telefonszam' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_grafikon_telefonszam
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'inaktiválás' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_inaktivalas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'leírás' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_leiras
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'telefonszám' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_telefonszam
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Dashboard') AND A_hits_eventInfo_eventAction = 'kattintás' AND A_hits_eventInfo_eventLabel = 'ár' THEN 1 ELSE 0 END) AS label_Dashboard_kattintas_ar
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'elrejtes' AND A_hits_eventInfo_eventLabel = 'licit' THEN 1 ELSE 0 END) AS label_ElrejtettHirdetesek_elrejtes_licit
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'elrejtes' AND A_hits_eventInfo_eventLabel = 'lista' THEN 1 ELSE 0 END) AS label_ElrejtettHirdetesek_elrejtes_lista
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'elrejtes' AND A_hits_eventInfo_eventLabel = 'reszletek' THEN 1 ELSE 0 END) AS label_ElrejtettHirdetesek_elrejtes_reszletek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'megjelenites' AND A_hits_eventInfo_eventLabel = 'licit' THEN 1 ELSE 0 END) AS label_ElrejtettHirdetesek_megjelenites_licit
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'megjelenites' AND A_hits_eventInfo_eventLabel = 'lista' THEN 1 ELSE 0 END) AS label_ElrejtettHirdetesek_megjelenites_lista
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('ElrejtettHirdetesek') AND A_hits_eventInfo_eventAction = 'megjelenites' AND A_hits_eventInfo_eventLabel = 'reszletek' THEN 1 ELSE 0 END) AS label_ElrejtettHirdetesek_megjelenites_reszletek
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' AND A_hits_eventInfo_eventLabel = 'Jelentem a hirdetest' THEN 1 ELSE 0 END) AS label_Eszkoztar_Kattintas_Jelentemahirdetest
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' AND A_hits_eventInfo_eventLabel = 'MegosztasEmailben' THEN 1 ELSE 0 END) AS label_Eszkoztar_Kattintas_MegosztasEmailben
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' AND A_hits_eventInfo_eventLabel = 'MegosztasFacebookon' THEN 1 ELSE 0 END) AS label_Eszkoztar_Kattintas_MegosztasFacebookon
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' AND A_hits_eventInfo_eventLabel = 'MegosztasGoogle' THEN 1 ELSE 0 END) AS label_Eszkoztar_Kattintas_MegosztasGoogle
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' AND A_hits_eventInfo_eventLabel = 'MegosztasTwitteren' THEN 1 ELSE 0 END) AS label_Eszkoztar_Kattintas_MegosztasTwitteren
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Kattintas' AND A_hits_eventInfo_eventLabel = 'Nyomtatas' THEN 1 ELSE 0 END) AS label_Eszkoztar_Kattintas_Nyomtatas
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'Bejelentes' THEN 1 ELSE 0 END) AS label_Eszkoztar_Sikeres_Bejelentes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'MegosztasEmailben' THEN 1 ELSE 0 END) AS label_Eszkoztar_Sikeres_MegosztasEmailben
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'elrejtes' THEN 1 ELSE 0 END) AS label_Eszkoztar_Sikeres_elrejtes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Eszkoztar') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'megjelenites' THEN 1 ELSE 0 END) AS label_Eszkoztar_Sikeres_megjelenites
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Megjelenes' AND A_hits_eventInfo_eventLabel = 'M1X-promo' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Megjelenes_M1X_promo
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Megjelenes' AND A_hits_eventInfo_eventLabel = 'fejlec' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Megjelenes_fejlec
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Megjelenes' AND A_hits_eventInfo_eventLabel = 'm1x-kapcsolo' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Megjelenes_m1x_kapcsolo
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Megjelenes' AND A_hits_eventInfo_eventLabel = 'mentes' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Megjelenes_mentes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'elrejtes' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Sikeres_elrejtes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'fejlec' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Sikeres_fejlec
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'm1x-kapcsolo' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Sikeres_m1x_kapcsolo
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'mentes' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Sikeres_mentes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendBelepes') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'showPhoneNumber' THEN 1 ELSE 0 END) AS label_FrontendBelepes_Sikeres_showPhoneNumber
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendRegisztracio') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'fejlec' THEN 1 ELSE 0 END) AS label_FrontendRegisztracio_Sikeres_fejlec
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendRegisztracio') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'm1x-kapcsolo' THEN 1 ELSE 0 END) AS label_FrontendRegisztracio_Sikeres_m1x_kapcsolo
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendRegisztracio') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'mentes' THEN 1 ELSE 0 END) AS label_FrontendRegisztracio_Sikeres_mentes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('FrontendRegisztracio') AND A_hits_eventInfo_eventAction = 'Sikeres' AND A_hits_eventInfo_eventLabel = 'showPhoneNumber' THEN 1 ELSE 0 END) AS label_FrontendRegisztracio_Sikeres_showPhoneNumber
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Licit') AND A_hits_eventInfo_eventAction = 'Mentes' AND A_hits_eventInfo_eventLabel = 'extrak' THEN 1 ELSE 0 END) AS label_Licit_Mentes_extrak
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Licit') AND A_hits_eventInfo_eventAction = 'Mentes' AND A_hits_eventInfo_eventLabel = 'hirdeteslista' THEN 1 ELSE 0 END) AS label_Licit_Mentes_hirdeteslista
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'illikvid piac' AND A_hits_eventInfo_eventLabel = 'Fizetos' THEN 1 ELSE 0 END) AS label_Piac_illikvidpiac_Fizetos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'illikvid piac' AND A_hits_eventInfo_eventLabel = 'Ingyenes' THEN 1 ELSE 0 END) AS label_Piac_illikvidpiac_Ingyenes
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'likvid piac' AND A_hits_eventInfo_eventLabel = 'Fizetos' THEN 1 ELSE 0 END) AS label_Piac_likvidpiac_Fizetos
+, SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('Piac') AND A_hits_eventInfo_eventAction = 'likvid piac' AND A_hits_eventInfo_eventLabel = 'Ingyenes' THEN 1 ELSE 0 END) AS label_Piac_likvidpiac_Ingyenes
+
+
+FROM [Gabor.v07_02_Hit_All]
+WHERE A_hit_visitStartTime_yyyymmdd <= '2018-01-21'
+GROUP BY 1
+

@@ -1,0 +1,37 @@
+-- v07_01_ID_Table
+-- select * from [Gabor.v07_01_ID_Table] limit 10
+
+
+SELECT fvid.fullVisitorId AS fullVisitorId
+, BPidmx.BusinessPartnerId AS BusinessPartnerId
+FROM (
+    SELECT fullVisitorId
+    , MIN(visitNumber) AS MIN_visitNumber
+    , MAX(visitNumber) AS MAX_visitNumber
+    , SUM(CASE WHEN hits.customDimensions.index = 42 THEN 1 ELSE 0 END) AS NR_BusinessPartnerId
+    FROM TABLE_DATE_RANGE ([5308965.ga_sessions_],TIMESTAMP('2018-01-08'), TIMESTAMP ('2018-01-21'))
+    GROUP BY 1
+    HAVING NOT (MAX(visitNumber) = 1 AND SUM(CASE WHEN hits.customDimensions.index = 42 THEN 1 ELSE 0 END) = 0)
+)fvid
+
+LEFT JOIN (
+    SELECT BPid.fullVisitorId AS fullVisitorId, BPid.BusinessPartnerId AS BusinessPartnerId
+    FROM (
+        select fullVisitorId
+        , CASE WHEN hits.customDimensions.index = 42 THEN hits.customDimensions.value END AS BusinessPartnerId
+        , MAX(STRFTIME_UTC_USEC(SEC_TO_TIMESTAMP(visitStartTime),"%Y-%m-%d %H:%M:%S")) AS MAX_date
+        FROM TABLE_DATE_RANGE ([5308965.ga_sessions_],TIMESTAMP('2017-09-27'), TIMESTAMP ('2018-01-21'))
+        WHERE hits.customDimensions.index = 42 
+        GROUP BY 1,2
+    )BPid
+    INNER JOIN (
+        SELECT fullVisitorId
+        , MAX(STRFTIME_UTC_USEC(SEC_TO_TIMESTAMP(visitStartTime),"%Y-%m-%d %H:%M:%S")) AS MAX_date
+        FROM TABLE_DATE_RANGE ([5308965.ga_sessions_],TIMESTAMP('2017-09-27'), TIMESTAMP ('2018-01-21'))
+        WHERE hits.customDimensions.index = 42 
+        GROUP BY 1
+    )mx
+    ON BPid.fullVisitorId = mx.fullVisitorId 
+    AND BPid.MAX_date = mx.MAX_date
+)BPidmx
+ON fvid.fullVisitorId = BPidmx.fullVisitorId

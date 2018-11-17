@@ -1,0 +1,77 @@
+-- v07_04_R_TABLE
+-- select min(rndnr) AS Minrnd, max(rndnr) AS Maxrnd from [Gabor.v07_04_R_TABLE]
+
+SELECT 
+RAND() AS rndnr
+, everEV.ID AS ID
+, everEV.*, everRE.*, apEV.*, apRE.*, wEV.*, wRE.*
+--performance 1w
+, (CASE WHEN perf.JZ IS NULL THEN 0 ELSE perf.JZ END) AS perf_JZ
+, (CASE WHEN perf.JZ_Kinyitas IS NULL THEN 0 ELSE perf.JZ_Kinyitas END) AS perf_JZ_Kinyitas
+, (CASE WHEN perf.JZ_Ujraszamol IS NULL THEN 0 ELSE perf.JZ_Ujraszamol END) AS perf_JZ_Ujraszamol
+, (CASE WHEN perf.JZ_Lead IS NULL THEN 0 ELSE perf.JZ_Lead END) AS perf_JZ_Lead
+, (CASE WHEN perf.BR_Kalkulator IS NULL THEN 0 ELSE perf.BR_Kalkulator END) AS perf_BR_Kalkulator
+, (CASE WHEN perf.BR_Kalkulator_hasznalt_lakasra IS NULL THEN 0 ELSE perf.BR_Kalkulator_hasznalt_lakasra END) AS perf_BR_Kalkulator_hasznalt_lakasra
+, (CASE WHEN perf.BR_Kalkulator_uj_lakasra IS NULL THEN 0 ELSE perf.BR_Kalkulator_uj_lakasra END) AS perf_BR_Kalkulator_uj_lakasra
+, (CASE WHEN perf.BR_Kalkulator_epitesi IS NULL THEN 0 ELSE perf.BR_Kalkulator_epitesi END) AS perf_BR_Kalkulator_epitesi
+, (CASE WHEN perf.BR_lakasfelujitas_korszerusites IS NULL THEN 0 ELSE perf.BR_lakasfelujitas_korszerusites END) AS perf_BR_lakasfelujitas_korszerusites
+, (CASE WHEN perf.BR_lakasfelujitas_lakasbovites IS NULL THEN 0 ELSE perf.BR_lakasfelujitas_lakasbovites END) AS  perf_BR_lakasfelujitas_lakasbovites
+, (CASE WHEN perf.BR_Konverzio IS NULL THEN 0 ELSE perf.BR_Konverzio END) AS perf_BR_Konverzio
+, (CASE WHEN perf.BR_Konverzio_Lead_form_lenyitas IS NULL THEN 0 ELSE perf.BR_Konverzio_Lead_form_lenyitas END) AS perf_BR_Konverzio_Lead_form_lenyitas
+, (CASE WHEN perf.BR_Konverzio_Lead IS NULL THEN 0 ELSE perf.BR_Konverzio_Lead END) AS perf_BR_Konverzio_Lead
+--performance 2w
+, (CASE WHEN perf2w.JZ IS NULL THEN 0 ELSE perf2w.JZ END) AS perf2w_JZ
+, (CASE WHEN perf2w.JZ_Kinyitas IS NULL THEN 0 ELSE perf2w.JZ_Kinyitas END) AS perf2w_JZ_Kinyitas
+, (CASE WHEN perf2w.JZ_Ujraszamol IS NULL THEN 0 ELSE perf2w.JZ_Ujraszamol END) AS perf2w_JZ_Ujraszamol
+, (CASE WHEN perf2w.JZ_Lead IS NULL THEN 0 ELSE perf2w.JZ_Lead END) AS perf2w_JZ_Lead
+, (CASE WHEN perf2w.BR_Kalkulator IS NULL THEN 0 ELSE perf2w.BR_Kalkulator END) AS perf2w_BR_Kalkulator
+, (CASE WHEN perf2w.BR_Kalkulator_hasznalt_lakasra IS NULL THEN 0 ELSE perf2w.BR_Kalkulator_hasznalt_lakasra END) AS perf2w_BR_Kalkulator_hasznalt_lakasra
+, (CASE WHEN perf2w.BR_Kalkulator_uj_lakasra IS NULL THEN 0 ELSE perf2w.BR_Kalkulator_uj_lakasra END) AS perf2w_BR_Kalkulator_uj_lakasra
+, (CASE WHEN perf2w.BR_Kalkulator_epitesi IS NULL THEN 0 ELSE perf2w.BR_Kalkulator_epitesi END) AS perf2w_BR_Kalkulator_epitesi
+, (CASE WHEN perf2w.BR_lakasfelujitas_korszerusites IS NULL THEN 0 ELSE perf2w.BR_lakasfelujitas_korszerusites END) AS perf2w_BR_lakasfelujitas_korszerusites
+, (CASE WHEN perf2w.BR_lakasfelujitas_lakasbovites IS NULL THEN 0 ELSE perf2w.BR_lakasfelujitas_lakasbovites END) AS  perf2w_BR_lakasfelujitas_lakasbovites
+, (CASE WHEN perf2w.BR_Konverzio IS NULL THEN 0 ELSE perf2w.BR_Konverzio END) AS perf2w_BR_Konverzio
+, (CASE WHEN perf2w.BR_Konverzio_Lead_form_lenyitas IS NULL THEN 0 ELSE perf2w.BR_Konverzio_Lead_form_lenyitas END) AS perf2w_BR_Konverzio_Lead_form_lenyitas
+, (CASE WHEN perf2w.BR_Konverzio_Lead IS NULL THEN 0 ELSE perf2w.BR_Konverzio_Lead END) AS perf2w_BR_Konverzio_Lead
+
+--select count(*) 
+FROM [Gabor.v07_031_Population_Events_Ever] everEV
+INNER JOIN [Gabor.v07_032_variables_REsearch_ever] everRE
+  ON everEV.ID = everRE.ID
+--activity period
+INNER JOIN [Gabor.v07_034_variables_Events_Others_activity_period]  apEV
+  ON everEV.ID = apEV.ID
+INNER JOIN [Gabor.v07_035_variables_REsearch_activity_period]  apRE
+  ON everEV.ID = apRE.ID
+--1 week
+INNER JOIN [Gabor.v07_036_variables_Events_Others_1week] wEV
+  ON everEV.ID = wEV.ID
+INNER JOIN [Gabor.v07_037_variables_REsearch_1week]  wRE
+  ON everEV.ID = wRE.ID
+--performance 1w
+LEFT JOIN [Gabor.v07_0391_performance_1week] perf
+  ON everEV.ID = perf.ID
+--performance 2w
+LEFT JOIN [Gabor.v07_0392_performance_2weeks] perf2w
+  ON everEV.ID = perf2w.ID
+
+WHERE
+-- ever legalább 3 session-je volt már
+  everEV.MAX_visitNumber >= 3
+-- ever keresett eladó ingatlant
+  AND everEV.HirdetesEladasmodja_Elado > 1
+-- ever magánembernek való ingatlant keresett
+  AND everEV.HirdetesTipus_Lakossag > 0
+-- ever megnézett már részletek oldalt
+  AND everEV.event_ReszletekOldalMegjelenes > 0
+-- ever nem office 
+AND NOT (
+  (everEV.Bejelentkezve_Office + everEV.Felhasznalo_Office) > 0 
+  AND (everEV.Bejelentkezve_Magan + everEV.Felhasznalo_Magan) = 0
+  )
+-- excluded 91 520 obs, 0,03% target rate
+AND everEV.HirdetesEladasmodja_Elado > 30
+-- excluded 118 512 obs, 0,03% target rate
+-- 0,03%
+AND everEV.device_desktop > 0
+

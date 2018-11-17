@@ -1,0 +1,86 @@
+-- v07_0391_performance_1week
+
+SELECT 
+A.ID AS ID
+, NR_JZ AS JZ
+, NR_JZ_Kinyitas AS JZ_Kinyitas
+, NR_JZ_Ujraszamol AS JZ_Ujraszamol
+, NR_JZ_Lead AS JZ_Lead
+, BR_Kalkulator AS BR_Kalkulator
+, BR_Kalkulator_hasznalt_lakasra AS BR_Kalkulator_hasznalt_lakasra
+, BR_Kalkulator_uj_lakasra AS BR_Kalkulator_uj_lakasra
+, BR_Kalkulator_epitesi AS BR_Kalkulator_epitesi
+, BR_lakasfelujitas_korszerusites AS BR_lakasfelujitas_korszerusites
+, BR_lakasfelujitas_lakasbovites AS BR_lakasfelujitas_lakasbovites
+, BR_Konverzio AS BR_Konverzio
+, BR_Konverzio_Lead_form_lenyitas AS BR_Konverzio_Lead_form_lenyitas
+, BR_Konverzio_Lead AS BR_Konverzio_Lead
+
+FROM (
+      SELECT ID
+      , SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('BR_jelzalog', 'Bankracio') THEN 1 ELSE 0 END) AS NR_JZ
+      , SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('BR_jelzalog', 'Bankracio') AND A_hits_eventInfo_eventLabel LIKE '%Kinyitas%' THEN 1 ELSE 0 END) AS NR_JZ_Kinyitas
+      , SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('BR_jelzalog', 'Bankracio') AND A_hits_eventInfo_eventLabel LIKE '%Ujraszamol%' THEN 1 ELSE 0 END) AS NR_JZ_Ujraszamol
+      , SUM(CASE WHEN A_hits_eventInfo_eventCategory IN ('BR_jelzalog', 'Bankracio') AND A_hits_eventInfo_eventLabel LIKE '%Lead%' THEN 1 ELSE 0 END) AS NR_JZ_Lead
+      FROM [Gabor.v07_02_Hit_All]
+      WHERE A_hit_visitStartTime_yyyymmdd BETWEEN '2018-01-22' AND '2018-01-28'
+      GROUP BY 1
+      ORDER BY 1
+)A
+LEFT JOIN (
+      SELECT ID
+      , SUM(BR_Kalkulator) AS BR_Kalkulator
+      , SUM(BR_Kalkulator_hasznalt_lakasra) AS BR_Kalkulator_hasznalt_lakasra
+      , SUM(BR_Kalkulator_uj_lakasra) AS BR_Kalkulator_uj_lakasra
+      , SUM(BR_Kalkulator_epitesi) AS BR_Kalkulator_epitesi
+      , SUM(BR_lakasfelujitas_korszerusites) AS BR_lakasfelujitas_korszerusites
+      , SUM(BR_lakasfelujitas_lakasbovites) AS BR_lakasfelujitas_lakasbovites
+      , SUM(BR_Konverzio) AS BR_Konverzio
+      , SUM(BR_Konverzio_Lead_form_lenyitas) AS BR_Konverzio_Lead_form_lenyitas
+      , SUM(BR_Konverzio_Lead) AS BR_Konverzio_Lead
+
+      FROM (
+        SELECT ID, DimFindgoreID
+        FROM [Gabor.v07_02_Hit_All]
+        WHERE A_hit_visitStartTime_yyyymmdd BETWEEN '2018-01-22' AND '2018-01-28'
+        GROUP BY 1,2
+      )A
+      INNER JOIN (
+        SELECT 
+        CASE WHEN hits.customDimensions.index = 8 THEN hits.customDimensions.value END AS FindgoreID
+        , SUM(CASE WHEN hits.eventInfo.eventCategory IN ('Kalkulator') AND hits.eventInfo.eventLabel LIKE '%/hitelkalkulator/lakashitel/%' AND hits.eventInfo.eventLabel NOT LIKE '%18-szabad-felhasznalasu%' THEN 1 ELSE 0 END) 
+            AS BR_Kalkulator
+        , SUM(CASE 
+            WHEN hits.eventInfo.eventCategory IN ('Kalkulator') AND hits.eventInfo.eventLabel LIKE '%/hitelkalkulator/lakashitel/%' AND hits.eventInfo.eventLabel NOT LIKE '%18-szabad-felhasznalasu%' 
+              AND (hits.eventInfo.eventLabel LIKE '%1-lakasvasarlasi-hitel-hasznalt-lakasra' OR hits.eventInfo.eventLabel LIKE '%1-hasznalt-lakas')
+              THEN 1 ELSE 0 END) AS BR_Kalkulator_hasznalt_lakasra
+        , SUM(CASE 
+            WHEN hits.eventInfo.eventCategory IN ('Kalkulator') AND hits.eventInfo.eventLabel LIKE '%/hitelkalkulator/lakashitel/%' AND hits.eventInfo.eventLabel NOT LIKE '%18-szabad-felhasznalasu%' 
+              AND (hits.eventInfo.eventLabel LIKE '%2-lakasvasarlasi-hitel-uj-lakasra' OR hits.eventInfo.eventLabel LIKE '%2-uj-lakashaz-vasarlasa')
+              THEN 1 ELSE 0 END) AS BR_Kalkulator_uj_lakasra
+        , SUM(CASE 
+            WHEN hits.eventInfo.eventCategory IN ('Kalkulator') AND hits.eventInfo.eventLabel LIKE '%/hitelkalkulator/lakashitel/%' AND hits.eventInfo.eventLabel NOT LIKE '%18-szabad-felhasznalasu%' 
+              AND (hits.eventInfo.eventLabel LIKE '%11-epitesi-hitel')
+              THEN 1 ELSE 0 END) AS BR_Kalkulator_epitesi
+        , SUM(CASE 
+            WHEN hits.eventInfo.eventCategory IN ('Kalkulator') AND hits.eventInfo.eventLabel LIKE '%/hitelkalkulator/lakashitel/%' AND hits.eventInfo.eventLabel NOT LIKE '%18-szabad-felhasznalasu%' 
+              AND (hits.eventInfo.eventLabel LIKE '%14-lakasfelujitasi-hitel' OR hits.eventInfo.eventLabel LIKE '%14-lakashaz-felujitasa' OR hits.eventInfo.eventLabel LIKE '%29-korszerusites')
+              THEN 1 ELSE 0 END) AS BR_lakasfelujitas_korszerusites
+        , SUM(CASE 
+            WHEN hits.eventInfo.eventCategory IN ('Kalkulator') AND hits.eventInfo.eventLabel LIKE '%/hitelkalkulator/lakashitel/%' AND hits.eventInfo.eventLabel NOT LIKE '%18-szabad-felhasznalasu%' 
+              AND (hits.eventInfo.eventLabel LIKE '%12-hitel-lakasbovites')
+              THEN 1 ELSE 0 END) AS BR_lakasfelujitas_lakasbovites
+        , SUM(CASE WHEN (hits.eventInfo.eventCategory IN ('Konverzio') AND SUBSTRING(hits.eventInfo.eventLabel, 1, 27) IN ('/hitelkalkulator/lakashitel')) THEN 1 ELSE 0 END) 
+            AS BR_Konverzio
+        , SUM(CASE WHEN (hits.eventInfo.eventCategory IN ('Konverzio') AND SUBSTRING(hits.eventInfo.eventLabel, 1, 27) IN ('/hitelkalkulator/lakashitel') AND hits.eventInfo.eventAction = 'Lead form lenyitás') THEN 1 ELSE 0 END) 
+            AS BR_Konverzio_Lead_form_lenyitas
+        , SUM(CASE WHEN (hits.eventInfo.eventCategory IN ('Konverzio') AND SUBSTRING(hits.eventInfo.eventLabel, 1, 27) IN ('/hitelkalkulator/lakashitel') AND hits.eventInfo.eventAction = 'Lead') THEN 1 ELSE 0 END) 
+            AS BR_Konverzio_Lead
+        FROM (TABLE_DATE_RANGE([85947453.ga_sessions_],TIMESTAMP('2018-01-22'), TIMESTAMP ('2018-01-28'))) 
+        GROUP BY 1
+      )BR
+      ON A.DimFindgoreID = BR.FindgoreID
+
+      GROUP BY 1
+)BRId
+ON A.ID = BRId.ID
