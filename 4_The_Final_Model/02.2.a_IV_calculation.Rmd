@@ -1,0 +1,84 @@
+#1 week performance period (f_Target)
+
+Information Values - Train - All variables
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+
+excl_names <- names(JZ_train)[c(grep("^b_perf.*", names(JZ_train)), grep("^perf2w_.*", names(JZ_train)), grep("^perf_.*", names(JZ_train)))]
+excl_names <- c(excl_names, "ID", "rndnr", "apEV_ID", "apRE_ID", "everEV_ID", "everEV_MIN_date", "everEV_MAX_date","everRE_ID", "wEV_ID", "wRE_ID", "n_Target", "n_Target_2w")
+
+excl_names <- c(excl_names, "f_Target_2w")
+IV_train_all <- data.table(iv.mult(data.frame(JZ_train[ , -excl_names, with=FALSE]), "f_Target", summary=TRUE))
+
+save(IV_train_all, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_all.rda")
+
+```
+
+Information Values - Train - iv>0 variables
+```{r}
+# iv>0
+IV_train_var_pos <- unlist(c(IV_train_all[InformationValue > 0.01][,1]))
+IV_train_var_dropped <- c("everEV_MIN_date")
+IV_train_var_pos <- IV_train_var_pos[! IV_train_var_pos %in% IV_train_var_dropped]
+
+# iv summary=FALSE
+IV_train_pos <- iv.mult(data.frame(
+  JZ_train[, c("f_Target", IV_train_var_pos), with=FALSE]
+), "f_Target", summary=FALSE)
+
+# selecting details
+IVdetails <- list() 
+for (i in 1:length(IV_train_pos)){
+  print(i)
+  IVvar <- IV_train_pos[[i]][1:9]
+  IVdetails <- rbind(IVdetails, IVvar)  
+}
+
+IVdetails <- data.table(IVdetails)
+
+save(IV_train_var_pos, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_var_pos.rda")
+save(IV_train_pos, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_pos.rda")
+save(IVdetails, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IVdetails.rda")
+```
+
+#2 weeks performance period (f_Target_2w)
+
+Information Values - Train - All variables
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+
+excl_names_2w <- names(JZ_train)[c(grep("^b_perf.*", names(JZ_train)), grep("^perf2w_.*", names(JZ_train)), grep("^perf_.*", names(JZ_train)))]
+excl_names_2w <- c(excl_names_2w, "ID", "rndnr", "apEV_ID", "apRE_ID", "everEV_ID", "everEV_MIN_date", "everEV_MAX_date","everRE_ID", "wEV_ID", "wRE_ID", "n_Target", "n_Target_2w")
+
+excl_names_2w <- c(excl_names_2w, "f_Target")
+IV_train_all_2w <- data.table(iv.mult(data.frame(JZ_train[ , -excl_names_2w, with=FALSE]), "f_Target_2w", summary=TRUE))
+
+save(IV_train_all_2w, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_all_2w.rda")
+
+```
+
+Information Values - Train - iv>0 variables
+```{r}
+# iv>0
+IV_train_var_pos_2w <- unlist(c(IV_train_all_2w[InformationValue > 0.01][,1]))
+IV_train_var_dropped_2w <- c("everEV_MIN_date")
+IV_train_var_pos_2w <- IV_train_var_pos_2w[! IV_train_var_pos_2w %in% IV_train_var_dropped_2w]
+
+# iv summary=FALSE
+IV_train_pos_2w <- iv.mult(data.frame(
+  JZ_train[, c("f_Target_2w", IV_train_var_pos_2w), with=FALSE]
+), "f_Target_2w", summary=FALSE)
+
+# selecting details
+IVdetails_2w <- list() 
+for (i in 1:length(IV_train_pos_2w)){
+  print(i)
+  IVvar <- IV_train_pos_2w[[i]][1:9]
+  IVdetails_2w <- rbind(IVdetails_2w, IVvar)  
+}
+
+IVdetails_2w <- data.table(IVdetails_2w)
+
+save(IV_train_var_pos_2w, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_var_pos_2w.rda")
+save(IV_train_pos_2w, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_pos_2w.rda")
+save(IVdetails_2w, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IVdetails_2w.rda")
+```
+

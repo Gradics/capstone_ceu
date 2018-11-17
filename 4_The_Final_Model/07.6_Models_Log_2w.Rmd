@@ -1,0 +1,321 @@
+#2 weeks performance period (f_Target_2w)
+
+m20_2w_logit_base_log
+```{r}
+var_in_model <- var_20_log_simple_2w
+tc <- trainControl(method = "cv", number=5, classProbs = TRUE, verboseIter = TRUE, summaryFunction = twoClassSummary)
+set.seed(1234)
+m20_2w_logit_base_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))),
+                    data = JZ_train,
+                    method = "glm",
+                    trControl = tc,
+                    metric = "ROC") 
+
+save(m20_2w_logit_base_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m20_2w_logit_base_log.rda")
+
+# test data
+m20_2w_test_pred <- predict.train(m20_2w_logit_base_log, newdata = JZ_test, type = "prob")
+m20_2w_pred_test <- prediction(m20_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m20_2w_perf_test <- performance(m20_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m20_2w_AUC_test <- performance(m20_2w_pred_test, measure = "auc")@y.values[[1]]
+m20_2w_roc_df_test <- data.table(
+  model = "m20_2w_logit_base_log",
+  FPR = m20_2w_perf_test@x.values[[1]],
+  TPR = m20_2w_perf_test@y.values[[1]],
+  cutoff = m20_2w_perf_test@alpha.values[[1]])
+
+# external data
+m20_2w_external_pred <- predict.train(m20_2w_logit_base_log, newdata = JZ_external, type = "prob")
+m20_2w_pred_external <- prediction(m20_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m20_2w_perf_external <- performance(m20_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m20_2w_AUC_external <- performance(m20_2w_pred_external, measure = "auc")@y.values[[1]]
+m20_2w_roc_df_external <- data.table(
+  model = "m20_2w_logit_base_log",
+  FPR = m20_2w_perf_external@x.values[[1]],
+  TPR = m20_2w_perf_external@y.values[[1]],
+  cutoff = m20_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  # coef(m20_2w_logit_base_log$finalModel)
+m20_2w_logit_base_log$results$ROC
+m20_2w_AUC_test
+m20_2w_AUC_external
+
+```
+
+
+m21_2w_logit_all_log
+```{r}
+# var_in_model <- var_21_log_all_2w
+# tc <- trainControl(method = "cv", number=5, classProbs = TRUE, verboseIter = TRUE, summaryFunction = twoClassSummary)
+# set.seed(1234)
+# m21_2w_logit_all_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))),
+#                     data = JZ_train,
+#                     method = "glm",
+#                     trControl = tc,
+#                     metric = "ROC") 
+# 
+# save(m21_2w_logit_all_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m21_2w_logit_all_log.rda")
+# 
+# # test data
+# m21_2w_test_pred <- predict.train(m21_2w_logit_all_log, newdata = JZ_test, type = "prob")
+# m21_2w_pred_test <- prediction(m21_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+# m21_2w_perf_test <- performance(m21_2w_pred_test, measure = "tpr", x.measure = "fpr")
+# m21_2w_AUC_test <- performance(m21_2w_pred_test, measure = "auc")@y.values[[1]]
+# m21_2w_roc_df_test <- data.table(
+#   model = "m21_2w_logit_all_log",
+#   FPR = m21_2w_perf_test@x.values[[1]],
+#   TPR = m21_2w_perf_test@y.values[[1]],
+#   cutoff = m21_2w_perf_test@alpha.values[[1]])
+# 
+# # external data
+# m21_2w_external_pred <- predict.train(m21_2w_logit_all_log, newdata = JZ_external, type = "prob")
+# m21_2w_pred_external <- prediction(m21_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+# m21_2w_perf_external <- performance(m21_2w_pred_external, measure = "tpr", x.measure = "fpr")
+# m21_2w_AUC_external <- performance(m21_2w_pred_external, measure = "auc")@y.values[[1]]
+# m21_2w_roc_df_external <- data.table(
+#   model = "m21_2w_logit_all_log",
+#   FPR = m21_2w_perf_external@x.values[[1]],
+#   TPR = m21_2w_perf_external@y.values[[1]],
+#   cutoff = m21_2w_perf_external@alpha.values[[1]])
+# 
+# # las resultas
+#   #coef(m21_2w_logit_all_log$finalModel)
+# m21_2w_logit_all_log$results$ROC
+# m21_2w_AUC_test
+# m21_2w_AUC_external
+
+```
+
+m22_2w_logit_penalized_log
+```{r}
+var_in_model <- var_21_log_all_2w
+tc <- trainControl(method = "cv", number=5, classProbs = TRUE, verboseIter = TRUE, summaryFunction = twoClassSummary)
+tg <- expand.grid("alpha" = c(0, 1), "lambda" = c(1, 0.1, 0.01))
+set.seed(1234)
+m22_2w_logit_penalized_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))),
+                    data = JZ_train,
+                    method = "glmnet",
+                    trControl = tc,
+                    tuneGrid = tg,
+                    metric = "ROC") 
+
+save(m22_2w_logit_penalized_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m22_2w_logit_penalized_log.rda")
+
+# test data
+m22_2w_test_pred <- predict.train(m22_2w_logit_penalized_log, newdata = JZ_test, type = "prob")
+m22_2w_pred_test <- prediction(m22_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m22_2w_perf_test <- performance(m22_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m22_2w_AUC_test <- performance(m22_2w_pred_test, measure = "auc")@y.values[[1]]
+m22_2w_roc_df_test <- data.table(
+  model = "m22_2w_logit_penalized_log",
+  FPR = m22_2w_perf_test@x.values[[1]],
+  TPR = m22_2w_perf_test@y.values[[1]],
+  cutoff = m22_2w_perf_test@alpha.values[[1]])
+
+# external data
+m22_2w_external_pred <- predict.train(m22_2w_logit_penalized_log, newdata = JZ_external, type = "prob")
+m22_2w_pred_external <- prediction(m22_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m22_2w_perf_external <- performance(m22_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m22_2w_AUC_external <- performance(m22_2w_pred_external, measure = "auc")@y.values[[1]]
+m22_2w_roc_df_external <- data.table(
+  model = "m22_2w_logit_penalized_log",
+  FPR = m22_2w_perf_external@x.values[[1]],
+  TPR = m22_2w_perf_external@y.values[[1]],
+  cutoff = m22_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  #coef(m22_2w_logit_penalized_log$finalModel)
+m22_2w_logit_penalized_log$results$ROC
+m22_2w_AUC_test
+m22_2w_AUC_external
+```
+
+m23_2w_rpart_log
+```{r}
+var_in_model <- var_21_log_all_2w
+tc <- trainControl(method = "cv", number=5, classProbs = TRUE, verboseIter = TRUE, summaryFunction = twoClassSummary)
+tg <- expand.grid("cp" = c(0.01, 0.001, 0.0001))
+set.seed(1234)
+m23_2w_rpart_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))),
+                    data = JZ_train,
+                    method = "rpart",
+                    trControl = tc,
+                    tuneGrid = tg,
+                    metric = "ROC")
+
+save(m23_2w_rpart_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m23_2w_rpart_log.rda")
+
+# test data
+m23_2w_test_pred <- predict.train(m23_2w_rpart_log, newdata = JZ_test, type = "prob")
+m23_2w_pred_test <- prediction(m23_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m23_2w_perf_test <- performance(m23_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m23_2w_AUC_test <- performance(m23_2w_pred_test, measure = "auc")@y.values[[1]]
+m23_2w_roc_df_test <- data.table(
+  model = "m23_2w_rpart_log",
+  FPR = m23_2w_perf_test@x.values[[1]],
+  TPR = m23_2w_perf_test@y.values[[1]],
+  cutoff = m23_2w_perf_test@alpha.values[[1]])
+
+# external data
+m23_2w_external_pred <- predict.train(m23_2w_rpart_log, newdata = JZ_external, type = "prob")
+m23_2w_pred_external <- prediction(m23_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m23_2w_perf_external <- performance(m23_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m23_2w_AUC_external <- performance(m23_2w_pred_external, measure = "auc")@y.values[[1]]
+m23_2w_roc_df_external <- data.table(
+  model = "m23_2w_rpart_log",
+  FPR = m23_2w_perf_external@x.values[[1]],
+  TPR = m23_2w_perf_external@y.values[[1]],
+  cutoff = m23_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+m23_2w_rpart_log$results$ROC
+m23_2w_AUC_test
+m23_2w_AUC_external
+```
+
+m24_2w_RF_log
+```{r}
+var_in_model <- var_21_log_all_2w
+tc <- trainControl(method = "cv", number=5, classProbs = TRUE, verboseIter = TRUE, summaryFunction = twoClassSummary)
+tg <- expand.grid(.mtry= c(10, round(sqrt(length(var_in_model))) ) )
+set.seed(1234)
+m24_2w_RF_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))),
+                data = JZ_train,
+                method = "rf",
+                trControl = tc,
+                tuneGrid = tg,
+                ntree = 300,
+                metric = "ROC") 
+
+save(m24_2w_RF_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m24_2w_RF_log.rda")
+
+# test data
+m24_2w_test_pred <- predict.train(m24_2w_RF_log, newdata = JZ_test, type = "prob")
+m24_2w_pred_test <- prediction(m24_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m24_2w_perf_test <- performance(m24_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m24_2w_AUC_test <- performance(m24_2w_pred_test, measure = "auc")@y.values[[1]]
+m24_2w_roc_df_test <- data.table(
+  model = "m24_2w_RF_log",
+  FPR = m24_2w_perf_test@x.values[[1]],
+  TPR = m24_2w_perf_test@y.values[[1]],
+  cutoff = m24_2w_perf_test@alpha.values[[1]])
+
+# external data
+m24_2w_external_pred <- predict.train(m24_2w_RF_log, newdata = JZ_external, type = "prob")
+m24_2w_pred_external <- prediction(m24_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m24_2w_perf_external <- performance(m24_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m24_2w_AUC_external <- performance(m24_2w_pred_external, measure = "auc")@y.values[[1]]
+m24_2w_roc_df_external <- data.table(
+  model = "m24_2w_RF_log",
+  FPR = m24_2w_perf_external@x.values[[1]],
+  TPR = m24_2w_perf_external@y.values[[1]],
+  cutoff = m24_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+varImp(m24_2w_RF_log, scale = FALSE)
+m24_2w_RF_log$results$ROC
+m24_2w_AUC_test
+m24_2w_AUC_external
+```
+
+m25_2w_pcr_log
+```{r}
+var_in_model <- var_21_log_all_2w
+tc <- trainControl(method = "cv", number=5, classProbs = TRUE, preProcOptions = list(thresh = 0.95), summaryFunction = twoClassSummary)
+m25_2w_pcr_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))), 
+                     data = JZ_train,
+                     method = "multinom", 
+                     family = binomial, 
+                     metric = "ROC",  
+                     verbose = TRUE, 
+                     preProcess=c("center", "scale", "pca"), 
+                     trControl = tc)
+
+save(m25_2w_pcr_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m25_2w_pcr_log.rda")
+
+# test data
+m25_2w_test_pred <- predict.train(m25_2w_pcr_log, newdata = JZ_test, type = "prob")
+m25_2w_pred_test <- prediction(m25_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m25_2w_perf_test <- performance(m25_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m25_2w_AUC_test <- performance(m25_2w_pred_test, measure = "auc")@y.values[[1]]
+m25_2w_roc_df_test <- data.table(
+  model = "m25_2w_pcr_log",
+  FPR = m25_2w_perf_test@x.values[[1]],
+  TPR = m25_2w_perf_test@y.values[[1]],
+  cutoff = m25_2w_perf_test@alpha.values[[1]])
+
+m25_2w_external_pred <- predict.train(m25_2w_pcr_log, newdata = JZ_external, type = "prob")
+m25_2w_pred_external <- prediction(m25_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m25_2w_perf_external <- performance(m25_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m25_2w_AUC_external <- performance(m25_2w_pred_external, measure = "auc")@y.values[[1]]
+m25_2w_roc_df_external <- data.table(
+  model = "m25_2w_pcr_log",
+  FPR = m25_2w_perf_external@x.values[[1]],
+  TPR = m25_2w_perf_external@y.values[[1]],
+  cutoff = m25_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m25_2w_pcr_log$finalModel)
+m25_2w_pcr_log$results$ROC
+m25_2w_AUC_test
+m25_2w_AUC_external
+```
+
+
+m26_2w_GBM_log
+```{r}
+var_in_model <- var_21_log_all_2w
+
+gbm_grid <- expand.grid(n.trees = c(100, 1000), 
+                        interaction.depth = c(1, 2, 20, floor(sqrt(NCOL(JZ_train)-1))), 
+                        shrinkage = c(0.005, 0.01, 0.1),
+                        n.minobsinnode = c(5, 10))
+set.seed(857)
+
+tc <- trainControl(method = "cv", number=5, classProbs = TRUE, preProcOptions = list(thresh = 0.95), summaryFunction = twoClassSummary)
+
+m26_2w_GBM_log <- train(formula(paste0("f_Target_2w"," ~ ",paste(var_in_model,collapse = " + "))), 
+                 data = JZ_train,
+                 method = "gbm", 
+                 #family = binomial, 
+                 metric = "ROC",  
+                 verbose = FALSE, 
+                 #preProcess=c("center", "scale", "pca"), 
+                 trControl = tc,
+                 tuneGrid = gbm_grid,
+                 bag.fraction = 0.5)
+
+save(m26_2w_GBM_log, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m26_2w_GBM_log.rda")
+
+# test data
+m26_2w_test_pred <- predict.train(m26_2w_GBM_log, newdata = JZ_test, type = "prob")
+m26_2w_pred_test <- prediction(m26_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m26_2w_perf_test <- performance(m26_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m26_2w_AUC_test <- performance(m26_2w_pred_test, measure = "auc")@y.values[[1]]
+m26_2w_roc_df_test <- data.table(
+  model = "m26_2w_GBM_log",
+  FPR = m26_2w_perf_test@x.values[[1]],
+  TPR = m26_2w_perf_test@y.values[[1]],
+  cutoff = m26_2w_perf_test@alpha.values[[1]])
+
+m26_2w_external_pred <- predict.train(m26_2w_GBM_log, newdata = JZ_external, type = "prob")
+m26_2w_pred_external <- prediction(m26_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m26_2w_perf_external <- performance(m26_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m26_2w_AUC_external <- performance(m26_2w_pred_external, measure = "auc")@y.values[[1]]
+m26_2w_roc_df_external <- data.table(
+  model = "m26_2w_GBM_log",
+  FPR = m26_2w_perf_external@x.values[[1]],
+  TPR = m26_2w_perf_external@y.values[[1]],
+  cutoff = m26_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m26_2w_GBM_log$finalModel)
+m26_2w_GBM_log$results$ROC
+m26_2w_AUC_test
+m26_2w_AUC_external
+
+
+
+```
+

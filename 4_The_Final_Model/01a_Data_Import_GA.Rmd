@@ -1,0 +1,62 @@
+
+Clearing environmnent
+```{r}
+cat("\f")
+rm(list=ls())
+```
+
+Loading packages
+```{r}
+library(bigQueryR)
+library(woe)
+
+library(data.table)
+library(caret)
+library(glmnet)
+library(ROCR)
+library(knitr)
+library(xlsx)
+
+library(skimr)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+library(rpart)
+library(randomForest)
+library(dplyr)
+
+specify_decimal <- function(x, k) trimws(format(round(x, k), nsmall=k))
+```
+
+
+JZ_import_1
+```{r}
+bqr_auth()
+JZ_import_1 <- bqr_query("ga-bq-export","Gabor","
+        SELECT * FROM [ga-bq-export:Gabor.v07_04_R_TABLE] WHERE rndnr BETWEEN 0 AND 0.3000 ")
+
+save(JZ_import_1, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/JZ_import_1.rda")
+```
+
+JZ_import_2
+```{r}
+bqr_auth()
+JZ_import_2 <- bqr_query("ga-bq-export","Gabor","
+        SELECT * FROM [ga-bq-export:Gabor.v07_04_R_TABLE] WHERE rndnr BETWEEN 0.3001 AND 0.6000 ")
+
+save(JZ_import_2, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/JZ_import_2.rda")
+
+```
+
+JZ_external_1
+```{r}
+bqr_auth()
+JZ_external_1 <- bqr_query("ga-bq-export","Gabor","
+        SELECT * FROM [ga-bq-export:Gabor.v08_04_R_TABLE] WHERE rndnr BETWEEN 0 AND 0.3000 ")
+
+save(JZ_external_1, file="c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/JZ_external_1.rda")
+```
+
+
+

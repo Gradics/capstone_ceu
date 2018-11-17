@@ -1,0 +1,131 @@
+Clear Environmnent from model data (memory needed)
+```{r}
+rm(
+  m00_logit_base
+  #, m01_logit_all
+  , m02_logit_penalized
+  #, m03_rpart
+  , m04_RF
+  , m05_pcr
+  , m10_logit_base_factor
+  #, m11_logit_all_factor
+  , m12_logit_penalized_facor
+  #, m13_rpart_factor
+  , m14_RF_factor
+  , m15_pcr_factor
+  , m20_logit_base_log
+  #, m21_logit_all_log
+  , m22_logit_penalized_log
+  #, m23_rpart_log
+  , m24_RF_log
+  , m25_pcr_log
+)
+
+rm(
+    m00_2w_logit_base
+  #, m01_2w_logit_all
+  , m02_2w_logit_penalized
+  #, m03_2w_rpart
+  , m04_2w_RF
+  , m05_2w_pcr
+  , m10_2w_logit_base_factor
+  #, m11_2w_logit_all_factor
+  , m12_2w_logit_penalized_facor
+  #, m13_2w_rpart_factor
+  , m14_2w_RF_factor
+  , m15_2w_pcr_factor
+  , m20_2w_logit_base_log
+  #, m21_2w_logit_all_log
+  , m22_2w_logit_penalized_log
+  #, m23_2w_rpart_log
+  , m24_2w_RF_log
+  , m25_2w_pcr_log
+)
+
+
+gc()
+
+```
+
+
+
+```{r}
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m12_logit_penalized_facor.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m22_2w_logit_penalized_log.rda")
+```
+
+
+
+```{r}
+JZ_Production$Y_1w <- predict(m12_logit_penalized_facor, newdata = JZ_Production, type = "prob")$Y
+summary(JZ_Production$Y_1w)
+JZ_Production$Y_2w <- predict(m22_2w_logit_penalized_log, newdata = JZ_Production, type = "prob")$Y
+summary(JZ_Production$Y_2w)
+```
+
+
+```{r}
+
+# 11 - calculated in prev. 3w
+# 12 - 0.6% alatt
+# 13 - 1%-5% k?z?tt
+# 14 - 5% felett
+
+
+JZ_Production <- JZ_Production[, `:=`(
+  User_Category = ifelse( (apEV_NR_JZ_Ujraszamol+apEV_NR_JZ_Lead) > 0, 11, 
+                          ifelse( Y_1w <= 0.006 & Y_2w <= 0.006, 12, 
+                                  ifelse( Y_1w > 0.05 & Y_2w > 0.05, 14, 
+                                          ifelse( Y_1w > 0.01 & Y_2w > 0.01, 13, 0))))
+  ),]
+
+
+
+
+
+JZ_Production[,.N,keyby=.(User_Category)]
+
+```
+
+
+```{r}
+
+JZ_GA_Upload <- data.table(merge(
+  JZ_ID_Table_Loaded[ID != 1,]
+  , JZ_Production[User_Category %in% c(11,12,13,14),.(ID, User_Category),]
+  , by = 'ID', all.x = FALSE, all.y = FALSE))
+
+JZ_GA_Upload[, .(.N, CNTuser = length(unique(ID))), keyby=.(User_Category)]
+
+# JZ_GA_Upload[, .N, keyby=.(B_DimclientID)][order(-N)]
+# nrow(JZ_GA_Upload)
+# length(unique(JZ_GA_Upload$B_DimclientID))
+       
+```
+
+
+
+```{r}
+# ga:dimension9
+# ga:dimension59
+
+JZ_GA_Upload_Merged <- rbind(JZ_GA_Upload[,.(gadimension9 = B_DimclientID, gadimension59 = User_Category),]
+                             , JZ_Control_Group_Loaded[,.(gadimension9=DimclientID, gadimension59),])
+JZ_GA_Upload_Merged[, .( CNTuser = length(unique(gadimension9)), .N ), keyby=.(gadimension59)]
+
+
+write.csv(
+  JZ_GA_Upload_Merged
+  , 'c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/Model_v08/JZ_GA_Upload_Merged.csv'
+)
+
+```
+
+
+# to do with JZ_GA_Upload_Merged.csv before submission to GA:
+-- delete 1st row (numbering)
+-- changes names to ga:dimension9 and ga:dimension59
+-- Ctrl-H (; -> ,)
+
+
+

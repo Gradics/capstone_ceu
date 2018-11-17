@@ -1,0 +1,724 @@
+
+#Load - 2 weeks performance period (f_Target_2w)
+
+
+```{r}
+# continuous
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m00_2w_logit_base.rda")
+# load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m01_2w_logit_all.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m02_2w_logit_penalized.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m03_2w_rpart.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m04_2w_RF.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m05_2w_pcr.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m06_2w_GBM.rda")
+
+# factor
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m10_2w_logit_base_factor.rda")
+# load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m11_2w_logit_all_factor.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m12_2w_logit_penalized_facor.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m13_2w_rpart_factor.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m14_2w_RF_factor.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m15_2w_pcr_factor.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m16_2w_GBM_factor.rda")
+
+# log
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m20_2w_logit_base_log.rda")
+# load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m21_2w_logit_all_log.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m22_2w_logit_penalized_log.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m23_2w_rpart_log.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m24_2w_RF_log.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m25_2w_pcr_log.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/m26_2w_GBM_log.rda")
+```
+
+
+#2 weeks performance period (f_Target_2w)
+
+##2w continuous
+
+m00_2w_logit_base
+```{r}
+
+# test data
+m00_2w_test_pred <- predict.train(m00_2w_logit_base, newdata = JZ_test, type = "prob")
+m00_2w_pred_test <- prediction(m00_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m00_2w_perf_test <- performance(m00_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m00_2w_AUC_test <- performance(m00_2w_pred_test, measure = "auc")@y.values[[1]]
+m00_2w_roc_df_test <- data.table(
+  model = "m00_2w_logit_base",
+  FPR = m00_2w_perf_test@x.values[[1]],
+  TPR = m00_2w_perf_test@y.values[[1]],
+  cutoff = m00_2w_perf_test@alpha.values[[1]])
+
+# external data
+m00_2w_external_pred <- predict.train(m00_2w_logit_base, newdata = JZ_external, type = "prob")
+m00_2w_pred_external <- prediction(m00_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m00_2w_perf_external <- performance(m00_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m00_2w_AUC_external <- performance(m00_2w_pred_external, measure = "auc")@y.values[[1]]
+m00_2w_roc_df_external <- data.table(
+  model = "m00_2w_logit_base",
+  FPR = m00_2w_perf_external@x.values[[1]],
+  TPR = m00_2w_perf_external@y.values[[1]],
+  cutoff = m00_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  # coef(m00_2w_logit_base$finalModel)
+m00_2w_logit_base$results$ROC
+m00_2w_AUC_test
+m00_2w_AUC_external
+
+```
+
+
+m01_2w_logit_all
+```{r}
+
+# # test data
+# m01_2w_test_pred <- predict.train(m01_2w_logit_all, newdata = JZ_test, type = "prob")
+# m01_2w_pred_test <- prediction(m01_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+# m01_2w_perf_test <- performance(m01_2w_pred_test, measure = "tpr", x.measure = "fpr")
+# m01_2w_AUC_test <- performance(m01_2w_pred_test, measure = "auc")@y.values[[1]]
+# m01_2w_roc_df_test <- data.table(
+#   model = "m01_2w_logit_all",
+#   FPR = m01_2w_perf_test@x.values[[1]],
+#   TPR = m01_2w_perf_test@y.values[[1]],
+#   cutoff = m01_2w_perf_test@alpha.values[[1]])
+# 
+# # external data
+# m01_2w_external_pred <- predict.train(m01_2w_logit_all, newdata = JZ_external, type = "prob")
+# m01_2w_pred_external <- prediction(m01_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+# m01_2w_perf_external <- performance(m01_2w_pred_external, measure = "tpr", x.measure = "fpr")
+# m01_2w_AUC_external <- performance(m01_2w_pred_external, measure = "auc")@y.values[[1]]
+# m01_2w_roc_df_external <- data.table(
+#   model = "m01_2w_logit_all",
+#   FPR = m01_2w_perf_external@x.values[[1]],
+#   TPR = m01_2w_perf_external@y.values[[1]],
+#   cutoff = m01_2w_perf_external@alpha.values[[1]])
+# 
+# # las resultas
+#   #coef(m01_2w_logit_all$finalModel)
+# m01_2w_logit_all$results$ROC
+# m01_2w_AUC_test
+# m01_2w_AUC_external
+
+```
+
+m02_2w_logit_penalized
+```{r}
+
+# test data
+m02_2w_test_pred <- predict.train(m02_2w_logit_penalized, newdata = JZ_test, type = "prob")
+m02_2w_pred_test <- prediction(m02_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m02_2w_perf_test <- performance(m02_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m02_2w_AUC_test <- performance(m02_2w_pred_test, measure = "auc")@y.values[[1]]
+m02_2w_roc_df_test <- data.table(
+  model = "m02_2w_logit_penalized",
+  FPR = m02_2w_perf_test@x.values[[1]],
+  TPR = m02_2w_perf_test@y.values[[1]],
+  cutoff = m02_2w_perf_test@alpha.values[[1]])
+
+# external data
+m02_2w_external_pred <- predict.train(m02_2w_logit_penalized, newdata = JZ_external, type = "prob")
+m02_2w_pred_external <- prediction(m02_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m02_2w_perf_external <- performance(m02_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m02_2w_AUC_external <- performance(m02_2w_pred_external, measure = "auc")@y.values[[1]]
+m02_2w_roc_df_external <- data.table(
+  model = "m02_2w_logit_penalized",
+  FPR = m02_2w_perf_external@x.values[[1]],
+  TPR = m02_2w_perf_external@y.values[[1]],
+  cutoff = m02_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  #coef(m02_2w_logit_penalized$finalModel)
+m02_2w_logit_penalized$results$ROC
+m02_2w_AUC_test
+m02_2w_AUC_external
+```
+
+m03_2w_rpart
+```{r}
+
+# test data
+m03_2w_test_pred <- predict.train(m03_2w_rpart, newdata = JZ_test, type = "prob")
+m03_2w_pred_test <- prediction(m03_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m03_2w_perf_test <- performance(m03_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m03_2w_AUC_test <- performance(m03_2w_pred_test, measure = "auc")@y.values[[1]]
+m03_2w_roc_df_test <- data.table(
+  model = "m03_2w_rpart",
+  FPR = m03_2w_perf_test@x.values[[1]],
+  TPR = m03_2w_perf_test@y.values[[1]],
+  cutoff = m03_2w_perf_test@alpha.values[[1]])
+
+# external data
+m03_2w_external_pred <- predict.train(m03_2w_rpart, newdata = JZ_external, type = "prob")
+m03_2w_pred_external <- prediction(m03_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m03_2w_perf_external <- performance(m03_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m03_2w_AUC_external <- performance(m03_2w_pred_external, measure = "auc")@y.values[[1]]
+m03_2w_roc_df_external <- data.table(
+  model = "m03_2w_rpart",
+  FPR = m03_2w_perf_external@x.values[[1]],
+  TPR = m03_2w_perf_external@y.values[[1]],
+  cutoff = m03_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+m03_2w_rpart$results$ROC
+m03_2w_AUC_test
+m03_2w_AUC_external
+```
+
+m04_2w_RF
+```{r}
+
+# test data
+m04_2w_test_pred <- predict.train(m04_2w_RF, newdata = JZ_test, type = "prob")
+m04_2w_pred_test <- prediction(m04_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m04_2w_perf_test <- performance(m04_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m04_2w_AUC_test <- performance(m04_2w_pred_test, measure = "auc")@y.values[[1]]
+m04_2w_roc_df_test <- data.table(
+  model = "m04_2w_RF",
+  FPR = m04_2w_perf_test@x.values[[1]],
+  TPR = m04_2w_perf_test@y.values[[1]],
+  cutoff = m04_2w_perf_test@alpha.values[[1]])
+
+# external data
+m04_2w_external_pred <- predict.train(m04_2w_RF, newdata = JZ_external, type = "prob")
+m04_2w_pred_external <- prediction(m04_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m04_2w_perf_external <- performance(m04_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m04_2w_AUC_external <- performance(m04_2w_pred_external, measure = "auc")@y.values[[1]]
+m04_2w_roc_df_external <- data.table(
+  model = "m04_2w_RF",
+  FPR = m04_2w_perf_external@x.values[[1]],
+  TPR = m04_2w_perf_external@y.values[[1]],
+  cutoff = m04_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+varImp(m04_2w_RF, scale = FALSE)
+m04_2w_RF$results$ROC
+m04_2w_AUC_test
+m04_2w_AUC_external
+```
+
+m05_2w_pcr
+```{r}
+
+# test data
+m05_2w_test_pred <- predict.train(m05_2w_pcr, newdata = JZ_test, type = "prob")
+m05_2w_pred_test <- prediction(m05_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m05_2w_perf_test <- performance(m05_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m05_2w_AUC_test <- performance(m05_2w_pred_test, measure = "auc")@y.values[[1]]
+m05_2w_roc_df_test <- data.table(
+  model = "m05_2w_pcr",
+  FPR = m05_2w_perf_test@x.values[[1]],
+  TPR = m05_2w_perf_test@y.values[[1]],
+  cutoff = m05_2w_perf_test@alpha.values[[1]])
+
+m05_2w_external_pred <- predict.train(m05_2w_pcr, newdata = JZ_external, type = "prob")
+m05_2w_pred_external <- prediction(m05_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m05_2w_perf_external <- performance(m05_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m05_2w_AUC_external <- performance(m05_2w_pred_external, measure = "auc")@y.values[[1]]
+m05_2w_roc_df_external <- data.table(
+  model = "m05_2w_pcr",
+  FPR = m05_2w_perf_external@x.values[[1]],
+  TPR = m05_2w_perf_external@y.values[[1]],
+  cutoff = m05_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m05_2w_pcr$finalModel)
+m05_2w_pcr$results$ROC
+m05_2w_AUC_test
+m05_2w_AUC_external
+```
+
+m06_2w_GBM
+```{r}
+# test data
+m06_2w_test_pred <- predict.train(m06_2w_GBM, newdata = JZ_test, type = "prob")
+m06_2w_pred_test <- prediction(m06_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m06_2w_perf_test <- performance(m06_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m06_2w_AUC_test <- performance(m06_2w_pred_test, measure = "auc")@y.values[[1]]
+m06_2w_roc_df_test <- data.table(
+  model = "m06_2w_GBM",
+  FPR = m06_2w_perf_test@x.values[[1]],
+  TPR = m06_2w_perf_test@y.values[[1]],
+  cutoff = m06_2w_perf_test@alpha.values[[1]])
+
+# external data
+m06_2w_external_pred <- predict.train(m06_2w_GBM, newdata = JZ_external, type = "prob")
+m06_2w_pred_external <- prediction(m06_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m06_2w_perf_external <- performance(m06_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m06_2w_AUC_external <- performance(m06_2w_pred_external, measure = "auc")@y.values[[1]]
+m06_2w_roc_df_external <- data.table(
+  model = "m06_2w_GBM",
+  FPR = m06_2w_perf_external@x.values[[1]],
+  TPR = m06_2w_perf_external@y.values[[1]],
+  cutoff = m06_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m06_2w_GBM$finalModel)
+m06_2w_GBM$results$ROC
+m06_2w_AUC_test
+m06_2w_AUC_external
+```
+
+
+##2w factor
+
+m10_2w_logit_base_factor
+```{r}
+# test data
+m10_2w_test_pred <- predict.train(m10_2w_logit_base_factor, newdata = JZ_test, type = "prob")
+m10_2w_pred_test <- prediction(m10_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m10_2w_perf_test <- performance(m10_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m10_2w_AUC_test <- performance(m10_2w_pred_test, measure = "auc")@y.values[[1]]
+m10_2w_roc_df_test <- data.table(
+  model = "m10_2w_logit_base_factor",
+  FPR = m10_2w_perf_test@x.values[[1]],
+  TPR = m10_2w_perf_test@y.values[[1]],
+  cutoff = m10_2w_perf_test@alpha.values[[1]])
+
+# external data
+m10_2w_external_pred <- predict.train(m10_2w_logit_base_factor, newdata = JZ_external, type = "prob")
+m10_2w_pred_external <- prediction(m10_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m10_2w_perf_external <- performance(m10_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m10_2w_AUC_external <- performance(m10_2w_pred_external, measure = "auc")@y.values[[1]]
+m10_2w_roc_df_external <- data.table(
+  model = "m10_2w_logit_base_factor",
+  FPR = m10_2w_perf_external@x.values[[1]],
+  TPR = m10_2w_perf_external@y.values[[1]],
+  cutoff = m10_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  # coef(m10_2w_logit_base_factor$finalModel)
+m10_2w_logit_base_factor$results$ROC
+m10_2w_AUC_test
+m10_2w_AUC_external
+
+```
+
+
+m11_2w_logit_all_factor
+```{r}
+# # test data
+# m11_2w_test_pred <- predict.train(m11_2w_logit_all_factor, newdata = JZ_test, type = "prob")
+# m11_2w_pred_test <- prediction(m11_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+# m11_2w_perf_test <- performance(m11_2w_pred_test, measure = "tpr", x.measure = "fpr")
+# m11_2w_AUC_test <- performance(m11_2w_pred_test, measure = "auc")@y.values[[1]]
+# m11_2w_roc_df_test <- data.table(
+#   model = "m11_2w_logit_all_factor",
+#   FPR = m11_2w_perf_test@x.values[[1]],
+#   TPR = m11_2w_perf_test@y.values[[1]],
+#   cutoff = m11_2w_perf_test@alpha.values[[1]])
+# 
+# # external data
+# m11_2w_external_pred <- predict.train(m11_2w_logit_all_factor, newdata = JZ_external, type = "prob")
+# m11_2w_pred_external <- prediction(m11_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+# m11_2w_perf_external <- performance(m11_2w_pred_external, measure = "tpr", x.measure = "fpr")
+# m11_2w_AUC_external <- performance(m11_2w_pred_external, measure = "auc")@y.values[[1]]
+# m11_2w_roc_df_external <- data.table(
+#   model = "m11_2w_logit_all_factor",
+#   FPR = m11_2w_perf_external@x.values[[1]],
+#   TPR = m11_2w_perf_external@y.values[[1]],
+#   cutoff = m11_2w_perf_external@alpha.values[[1]])
+# 
+# # las resultas
+#   #coef(m11_2w_logit_all_factor$finalModel)
+# m11_2w_logit_all_factor$results$ROC
+# m11_2w_AUC_test
+# m11_2w_AUC_external
+
+```
+
+m12_2w_logit_penalized_facor
+```{r}
+# test data
+m12_2w_test_pred <- predict.train(m12_2w_logit_penalized_facor, newdata = JZ_test, type = "prob")
+m12_2w_pred_test <- prediction(m12_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m12_2w_perf_test <- performance(m12_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m12_2w_AUC_test <- performance(m12_2w_pred_test, measure = "auc")@y.values[[1]]
+m12_2w_roc_df_test <- data.table(
+  model = "m12_2w_logit_penalized_facor",
+  FPR = m12_2w_perf_test@x.values[[1]],
+  TPR = m12_2w_perf_test@y.values[[1]],
+  cutoff = m12_2w_perf_test@alpha.values[[1]])
+
+# external data
+m12_2w_external_pred <- predict.train(m12_2w_logit_penalized_facor, newdata = JZ_external, type = "prob")
+m12_2w_pred_external <- prediction(m12_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m12_2w_perf_external <- performance(m12_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m12_2w_AUC_external <- performance(m12_2w_pred_external, measure = "auc")@y.values[[1]]
+m12_2w_roc_df_external <- data.table(
+  model = "m12_2w_logit_penalized_facor",
+  FPR = m12_2w_perf_external@x.values[[1]],
+  TPR = m12_2w_perf_external@y.values[[1]],
+  cutoff = m12_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  #coef(m12_2w_logit_penalized_facor$finalModel)
+m12_2w_logit_penalized_facor$results$ROC
+m12_2w_AUC_test
+m12_2w_AUC_external
+```
+
+m13_2w_rpart_factor
+```{r}
+# test data
+m13_2w_test_pred <- predict.train(m13_2w_rpart_factor, newdata = JZ_test, type = "prob")
+m13_2w_pred_test <- prediction(m13_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m13_2w_perf_test <- performance(m13_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m13_2w_AUC_test <- performance(m13_2w_pred_test, measure = "auc")@y.values[[1]]
+m13_2w_roc_df_test <- data.table(
+  model = "m13_2w_rpart_factor",
+  FPR = m13_2w_perf_test@x.values[[1]],
+  TPR = m13_2w_perf_test@y.values[[1]],
+  cutoff = m13_2w_perf_test@alpha.values[[1]])
+
+# external data
+m13_2w_external_pred <- predict.train(m13_2w_rpart_factor, newdata = JZ_external, type = "prob")
+m13_2w_pred_external <- prediction(m13_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m13_2w_perf_external <- performance(m13_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m13_2w_AUC_external <- performance(m13_2w_pred_external, measure = "auc")@y.values[[1]]
+m13_2w_roc_df_external <- data.table(
+  model = "m13_2w_rpart_factor",
+  FPR = m13_2w_perf_external@x.values[[1]],
+  TPR = m13_2w_perf_external@y.values[[1]],
+  cutoff = m13_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+m13_2w_rpart_factor$results$ROC
+m13_2w_AUC_test
+m13_2w_AUC_external
+```
+
+m14_2w_RF_factor
+```{r}
+# test data
+m14_2w_test_pred <- predict.train(m14_2w_RF_factor, newdata = JZ_test, type = "prob")
+m14_2w_pred_test <- prediction(m14_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m14_2w_perf_test <- performance(m14_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m14_2w_AUC_test <- performance(m14_2w_pred_test, measure = "auc")@y.values[[1]]
+m14_2w_roc_df_test <- data.table(
+  model = "m14_2w_RF_factor",
+  FPR = m14_2w_perf_test@x.values[[1]],
+  TPR = m14_2w_perf_test@y.values[[1]],
+  cutoff = m14_2w_perf_test@alpha.values[[1]])
+
+# external data
+m14_2w_external_pred <- predict.train(m14_2w_RF_factor, newdata = JZ_external, type = "prob")
+m14_2w_pred_external <- prediction(m14_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m14_2w_perf_external <- performance(m14_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m14_2w_AUC_external <- performance(m14_2w_pred_external, measure = "auc")@y.values[[1]]
+m14_2w_roc_df_external <- data.table(
+  model = "m14_2w_RF_factor",
+  FPR = m14_2w_perf_external@x.values[[1]],
+  TPR = m14_2w_perf_external@y.values[[1]],
+  cutoff = m14_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+varImp(m14_2w_RF_factor, scale = FALSE)
+m14_2w_RF_factor$results$ROC
+m14_2w_AUC_test
+m14_2w_AUC_external
+```
+
+m15_2w_pcr_factor
+```{r}
+# test data
+m15_2w_test_pred <- predict.train(m15_2w_pcr_factor, newdata = JZ_test, type = "prob")
+m15_2w_pred_test <- prediction(m15_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m15_2w_perf_test <- performance(m15_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m15_2w_AUC_test <- performance(m15_2w_pred_test, measure = "auc")@y.values[[1]]
+m15_2w_roc_df_test <- data.table(
+  model = "m15_2w_pcr_factor",
+  FPR = m15_2w_perf_test@x.values[[1]],
+  TPR = m15_2w_perf_test@y.values[[1]],
+  cutoff = m15_2w_perf_test@alpha.values[[1]])
+
+m15_2w_external_pred <- predict.train(m15_2w_pcr_factor, newdata = JZ_external, type = "prob")
+m15_2w_pred_external <- prediction(m15_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m15_2w_perf_external <- performance(m15_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m15_2w_AUC_external <- performance(m15_2w_pred_external, measure = "auc")@y.values[[1]]
+m15_2w_roc_df_external <- data.table(
+  model = "m15_2w_pcr_factor",
+  FPR = m15_2w_perf_external@x.values[[1]],
+  TPR = m15_2w_perf_external@y.values[[1]],
+  cutoff = m15_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m15_2w_pcr_factor$finalModel)
+m15_2w_pcr_factor$results$ROC
+m15_2w_AUC_test
+m15_2w_AUC_external
+```
+
+m16_2w_GBM_factor
+```{r}
+
+# test data
+m16_2w_test_pred <- predict.train(m16_2w_GBM_factor, newdata = JZ_test, type = "prob")
+m16_2w_pred_test <- prediction(m16_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m16_2w_perf_test <- performance(m16_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m16_2w_AUC_test <- performance(m16_2w_pred_test, measure = "auc")@y.values[[1]]
+m16_2w_roc_df_test <- data.table(
+  model = "m16_2w_GBM_factor",
+  FPR = m16_2w_perf_test@x.values[[1]],
+  TPR = m16_2w_perf_test@y.values[[1]],
+  cutoff = m16_2w_perf_test@alpha.values[[1]])
+
+m16_2w_external_pred <- predict.train(m16_2w_GBM_factor, newdata = JZ_external, type = "prob")
+m16_2w_pred_external <- prediction(m16_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m16_2w_perf_external <- performance(m16_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m16_2w_AUC_external <- performance(m16_2w_pred_external, measure = "auc")@y.values[[1]]
+m16_2w_roc_df_external <- data.table(
+  model = "m16_2w_GBM_factor",
+  FPR = m16_2w_perf_external@x.values[[1]],
+  TPR = m16_2w_perf_external@y.values[[1]],
+  cutoff = m16_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m16_2w_GBM_factor$finalModel)
+m16_2w_GBM_factor$results$ROC
+m16_2w_AUC_test
+m16_2w_AUC_external
+
+```
+
+##2w log
+
+m20_2w_logit_base_log
+```{r}
+# test data
+m20_2w_test_pred <- predict.train(m20_2w_logit_base_log, newdata = JZ_test, type = "prob")
+m20_2w_pred_test <- prediction(m20_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m20_2w_perf_test <- performance(m20_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m20_2w_AUC_test <- performance(m20_2w_pred_test, measure = "auc")@y.values[[1]]
+m20_2w_roc_df_test <- data.table(
+  model = "m20_2w_logit_base_log",
+  FPR = m20_2w_perf_test@x.values[[1]],
+  TPR = m20_2w_perf_test@y.values[[1]],
+  cutoff = m20_2w_perf_test@alpha.values[[1]])
+
+# external data
+m20_2w_external_pred <- predict.train(m20_2w_logit_base_log, newdata = JZ_external, type = "prob")
+m20_2w_pred_external <- prediction(m20_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m20_2w_perf_external <- performance(m20_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m20_2w_AUC_external <- performance(m20_2w_pred_external, measure = "auc")@y.values[[1]]
+m20_2w_roc_df_external <- data.table(
+  model = "m20_2w_logit_base_log",
+  FPR = m20_2w_perf_external@x.values[[1]],
+  TPR = m20_2w_perf_external@y.values[[1]],
+  cutoff = m20_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  # coef(m20_2w_logit_base_log$finalModel)
+m20_2w_logit_base_log$results$ROC
+m20_2w_AUC_test
+m20_2w_AUC_external
+
+```
+
+
+m21_2w_logit_all_log
+```{r}
+# # test data
+# m21_2w_test_pred <- predict.train(m21_2w_logit_all_log, newdata = JZ_test, type = "prob")
+# m21_2w_pred_test <- prediction(m21_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+# m21_2w_perf_test <- performance(m21_2w_pred_test, measure = "tpr", x.measure = "fpr")
+# m21_2w_AUC_test <- performance(m21_2w_pred_test, measure = "auc")@y.values[[1]]
+# m21_2w_roc_df_test <- data.table(
+#   model = "m21_2w_logit_all_log",
+#   FPR = m21_2w_perf_test@x.values[[1]],
+#   TPR = m21_2w_perf_test@y.values[[1]],
+#   cutoff = m21_2w_perf_test@alpha.values[[1]])
+# 
+# # external data
+# m21_2w_external_pred <- predict.train(m21_2w_logit_all_log, newdata = JZ_external, type = "prob")
+# m21_2w_pred_external <- prediction(m21_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+# m21_2w_perf_external <- performance(m21_2w_pred_external, measure = "tpr", x.measure = "fpr")
+# m21_2w_AUC_external <- performance(m21_2w_pred_external, measure = "auc")@y.values[[1]]
+# m21_2w_roc_df_external <- data.table(
+#   model = "m21_2w_logit_all_log",
+#   FPR = m21_2w_perf_external@x.values[[1]],
+#   TPR = m21_2w_perf_external@y.values[[1]],
+#   cutoff = m21_2w_perf_external@alpha.values[[1]])
+# 
+# # las resultas
+#   #coef(m21_2w_logit_all_log$finalModel)
+# m21_2w_logit_all_log$results$ROC
+# m21_2w_AUC_test
+# m21_2w_AUC_external
+
+```
+
+m22_2w_logit_penalized_log
+```{r}
+# test data
+m22_2w_test_pred <- predict.train(m22_2w_logit_penalized_log, newdata = JZ_test, type = "prob")
+m22_2w_pred_test <- prediction(m22_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m22_2w_perf_test <- performance(m22_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m22_2w_AUC_test <- performance(m22_2w_pred_test, measure = "auc")@y.values[[1]]
+m22_2w_roc_df_test <- data.table(
+  model = "m22_2w_logit_penalized_log",
+  FPR = m22_2w_perf_test@x.values[[1]],
+  TPR = m22_2w_perf_test@y.values[[1]],
+  cutoff = m22_2w_perf_test@alpha.values[[1]])
+
+# external data
+m22_2w_external_pred <- predict.train(m22_2w_logit_penalized_log, newdata = JZ_external, type = "prob")
+m22_2w_pred_external <- prediction(m22_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m22_2w_perf_external <- performance(m22_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m22_2w_AUC_external <- performance(m22_2w_pred_external, measure = "auc")@y.values[[1]]
+m22_2w_roc_df_external <- data.table(
+  model = "m22_2w_logit_penalized_log",
+  FPR = m22_2w_perf_external@x.values[[1]],
+  TPR = m22_2w_perf_external@y.values[[1]],
+  cutoff = m22_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+  #coef(m22_2w_logit_penalized_log$finalModel)
+m22_2w_logit_penalized_log$results$ROC
+m22_2w_AUC_test
+m22_2w_AUC_external
+```
+
+m23_2w_rpart_log
+```{r}
+# test data
+m23_2w_test_pred <- predict.train(m23_2w_rpart_log, newdata = JZ_test, type = "prob")
+m23_2w_pred_test <- prediction(m23_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m23_2w_perf_test <- performance(m23_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m23_2w_AUC_test <- performance(m23_2w_pred_test, measure = "auc")@y.values[[1]]
+m23_2w_roc_df_test <- data.table(
+  model = "m23_2w_rpart_log",
+  FPR = m23_2w_perf_test@x.values[[1]],
+  TPR = m23_2w_perf_test@y.values[[1]],
+  cutoff = m23_2w_perf_test@alpha.values[[1]])
+
+# external data
+m23_2w_external_pred <- predict.train(m23_2w_rpart_log, newdata = JZ_external, type = "prob")
+m23_2w_pred_external <- prediction(m23_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m23_2w_perf_external <- performance(m23_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m23_2w_AUC_external <- performance(m23_2w_pred_external, measure = "auc")@y.values[[1]]
+m23_2w_roc_df_external <- data.table(
+  model = "m23_2w_rpart_log",
+  FPR = m23_2w_perf_external@x.values[[1]],
+  TPR = m23_2w_perf_external@y.values[[1]],
+  cutoff = m23_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+m23_2w_rpart_log$results$ROC
+m23_2w_AUC_test
+m23_2w_AUC_external
+```
+
+m24_2w_RF_log
+```{r}
+# test data
+m24_2w_test_pred <- predict.train(m24_2w_RF_log, newdata = JZ_test, type = "prob")
+m24_2w_pred_test <- prediction(m24_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m24_2w_perf_test <- performance(m24_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m24_2w_AUC_test <- performance(m24_2w_pred_test, measure = "auc")@y.values[[1]]
+m24_2w_roc_df_test <- data.table(
+  model = "m24_2w_RF_log",
+  FPR = m24_2w_perf_test@x.values[[1]],
+  TPR = m24_2w_perf_test@y.values[[1]],
+  cutoff = m24_2w_perf_test@alpha.values[[1]])
+
+# external data
+m24_2w_external_pred <- predict.train(m24_2w_RF_log, newdata = JZ_external, type = "prob")
+m24_2w_pred_external <- prediction(m24_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m24_2w_perf_external <- performance(m24_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m24_2w_AUC_external <- performance(m24_2w_pred_external, measure = "auc")@y.values[[1]]
+m24_2w_roc_df_external <- data.table(
+  model = "m24_2w_RF_log",
+  FPR = m24_2w_perf_external@x.values[[1]],
+  TPR = m24_2w_perf_external@y.values[[1]],
+  cutoff = m24_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+varImp(m24_2w_RF_log, scale = FALSE)
+m24_2w_RF_log$results$ROC
+m24_2w_AUC_test
+m24_2w_AUC_external
+```
+
+m25_2w_pcr_log
+```{r}
+# test data
+m25_2w_test_pred <- predict.train(m25_2w_pcr_log, newdata = JZ_test, type = "prob")
+m25_2w_pred_test <- prediction(m25_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m25_2w_perf_test <- performance(m25_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m25_2w_AUC_test <- performance(m25_2w_pred_test, measure = "auc")@y.values[[1]]
+m25_2w_roc_df_test <- data.table(
+  model = "m25_2w_pcr_log",
+  FPR = m25_2w_perf_test@x.values[[1]],
+  TPR = m25_2w_perf_test@y.values[[1]],
+  cutoff = m25_2w_perf_test@alpha.values[[1]])
+
+m25_2w_external_pred <- predict.train(m25_2w_pcr_log, newdata = JZ_external, type = "prob")
+m25_2w_pred_external <- prediction(m25_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m25_2w_perf_external <- performance(m25_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m25_2w_AUC_external <- performance(m25_2w_pred_external, measure = "auc")@y.values[[1]]
+m25_2w_roc_df_external <- data.table(
+  model = "m25_2w_pcr_log",
+  FPR = m25_2w_perf_external@x.values[[1]],
+  TPR = m25_2w_perf_external@y.values[[1]],
+  cutoff = m25_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m25_2w_pcr_log$finalModel)
+m25_2w_pcr_log$results$ROC
+m25_2w_AUC_test
+m25_2w_AUC_external
+```
+
+m26_2w_GBM_log
+```{r}
+# test data
+m26_2w_test_pred <- predict.train(m26_2w_GBM_log, newdata = JZ_test, type = "prob")
+m26_2w_pred_test <- prediction(m26_2w_test_pred$Y, JZ_test[["f_Target_2w"]])
+m26_2w_perf_test <- performance(m26_2w_pred_test, measure = "tpr", x.measure = "fpr")
+m26_2w_AUC_test <- performance(m26_2w_pred_test, measure = "auc")@y.values[[1]]
+m26_2w_roc_df_test <- data.table(
+  model = "m26_2w_GBM_log",
+  FPR = m26_2w_perf_test@x.values[[1]],
+  TPR = m26_2w_perf_test@y.values[[1]],
+  cutoff = m26_2w_perf_test@alpha.values[[1]])
+
+m26_2w_external_pred <- predict.train(m26_2w_GBM_log, newdata = JZ_external, type = "prob")
+m26_2w_pred_external <- prediction(m26_2w_external_pred$Y, JZ_external[["f_Target_2w"]])
+m26_2w_perf_external <- performance(m26_2w_pred_external, measure = "tpr", x.measure = "fpr")
+m26_2w_AUC_external <- performance(m26_2w_pred_external, measure = "auc")@y.values[[1]]
+m26_2w_roc_df_external <- data.table(
+  model = "m26_2w_GBM_log",
+  FPR = m26_2w_perf_external@x.values[[1]],
+  TPR = m26_2w_perf_external@y.values[[1]],
+  cutoff = m26_2w_perf_external@alpha.values[[1]])
+
+# las resultas
+#coef(m26_2w_GBM_log$finalModel)
+m26_2w_GBM_log$results$ROC
+m26_2w_AUC_test
+m26_2w_AUC_external
+
+```
+
+
+deleting what is not needed
+```{r}
+rm(m00_2w_test_pred, m00_2w_pred_test, m00_2w_perf_test, m00_2w_external_pred, m00_2w_pred_external, m00_2w_perf_external)
+rm(m02_2w_test_pred, m02_2w_pred_test, m02_2w_perf_test, m02_2w_external_pred, m02_2w_pred_external, m02_2w_perf_external)
+rm(m04_2w_test_pred, m04_2w_pred_test, m04_2w_perf_test, m04_2w_external_pred, m04_2w_pred_external, m04_2w_perf_external)
+rm(m05_2w_test_pred, m05_2w_pred_test, m05_2w_perf_test, m05_2w_external_pred, m05_2w_pred_external, m05_2w_perf_external)
+rm(m06_2w_test_pred, m06_2w_pred_test, m06_2w_perf_test, m06_2w_external_pred, m06_2w_pred_external, m06_2w_perf_external)
+rm(m10_2w_test_pred, m10_2w_pred_test, m10_2w_perf_test, m10_2w_external_pred, m10_2w_pred_external, m10_2w_perf_external)
+rm(m12_2w_test_pred, m12_2w_pred_test, m12_2w_perf_test, m12_2w_external_pred, m12_2w_pred_external, m12_2w_perf_external)
+rm(m14_2w_test_pred, m14_2w_pred_test, m14_2w_perf_test, m14_2w_external_pred, m14_2w_pred_external, m14_2w_perf_external)
+rm(m15_2w_test_pred, m15_2w_pred_test, m15_2w_perf_test, m15_2w_external_pred, m15_2w_pred_external, m15_2w_perf_external)
+rm(m16_2w_test_pred, m16_2w_pred_test, m16_2w_perf_test, m16_2w_external_pred, m16_2w_pred_external, m16_2w_perf_external)
+rm(m20_2w_test_pred, m20_2w_pred_test, m20_2w_perf_test, m20_2w_external_pred, m20_2w_pred_external, m20_2w_perf_external)
+rm(m22_2w_test_pred, m22_2w_pred_test, m22_2w_perf_test, m22_2w_external_pred, m22_2w_pred_external, m22_2w_perf_external)
+rm(m24_2w_test_pred, m24_2w_pred_test, m24_2w_perf_test, m24_2w_external_pred, m24_2w_pred_external, m24_2w_perf_external)
+rm(m25_2w_test_pred, m25_2w_pred_test, m25_2w_perf_test, m25_2w_external_pred, m25_2w_pred_external, m25_2w_perf_external)
+rm(m26_2w_test_pred, m26_2w_pred_test, m26_2w_perf_test, m26_2w_external_pred, m26_2w_pred_external, m26_2w_perf_external)
+```
+

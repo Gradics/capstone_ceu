@@ -1,0 +1,213 @@
+-- Jelzalog_Lead_Test_id_OOT
+
+
+SELECT
+K_icomid AS icomid
+-- RHS
+, CASE WHEN NR_Bankracio >= 1 THEN 1 ELSE 0 END AS NR_Bankracio
+, CASE WHEN NR_Ujraszamol >= 1 THEN 1 ELSE 0 END AS NR_Ujraszamol
+, CASE WHEN NR_Lead >= 1 THEN 1 ELSE 0 END AS NR_Lead
+, CASE WHEN BR_Activity >= 1 THEN 1 ELSE 0 END AS BR_Activity
+, CASE WHEN NR_Bankracio >= 1 OR BR_Activity >= 1 THEN 1 ELSE 0 END AS NR_Bankracio_All
+, CASE WHEN NR_Ujraszamol >= 1 OR BR_Activity >= 1 THEN 1 ELSE 0 END AS NR_Ujraszamol_All
+-- keresés
+, K_nr_diff_RE, K_nr_diff_City, K_nr_diff_Altipus, K_nr_diff_Megye
+, K_min_Alapterulet, K_avg_Alapterulet, K_max_Alapterulet, K_std_Alapterulet
+, K_min_DimHirdetesar, K_avg_DimHirdetesar, K_max_DimHirdetesar, K_std_DimHirdetesar
+, K_nr_diff_RE_BP, K_min_DimHirdetesar_BP, K_avg_DimHirdetesar_BP, K_max_DimHirdetesar_BP, K_std_DimHirdetesar_BP
+, Hol_Budapest, Hol_Bekescsaba, Hol_Debrecen, Hol_Eger, Hol_Gyor, Hol_Kaposvar, Hol_Kecskemet, Hol_Miskolc, Hol_Nyiregyhaza, Hol_Pecs, Hol_Salgotarjan, Hol_Szeged, Hol_Szekesfehervar, Hol_Szekszard, Hol_Szolnok, Hol_Szombathely, Hol_Tatabanya, Hol_Veszprem, Hol_Zalaegerszeg
+, K.Mit_hazresz, K.Mit_konnyuszerkezetes, K.Mit_csaladi_haz, K.Mit_nyaralotelek, K.Mit_csuszozsalus, K.Mit_uduloovezeti, K.Mit_tegla, K.Mit_hetvegi_hazas, K.Mit_kastely, K.Mit_lakoovezeti, K.Mit_sorhaz, K.Mit_udulohazas, K.Mit_tanya, K.Mit_kulteruleti, K.Mit_panel, K.Mit_ikerhaz
+-- eladás
+, M.Elado_Nr, M.Elado_Sum_Ar, M.Elado_Avg_Ar
+, M.Elado_Nr_Bp, M.Elado_Sum_Ar_Bp, M.Elado_Avg_Ar_Bp
+, M.Elado_Nr_Piac_Forro, M.Elado_Sum_Ar_Piac_Forro, M.Elado_Avg_Ar_Piac_Forro
+, M.Elado_Nr_Piac_Likvid, M.Elado_Sum_Ar_Piac_Likvid, M.Elado_Avg_Ar_Piac_Likvid
+, M.Elado_Nr_Piac_Illikvid, M.Elado_Sum_Ar_Piac_Illikvid, M.Elado_Avg_Ar_Piac_Illikvid
+--
+, MT.visitNumber_min, MT.visitNumber_max, MT.totals.hits, MT.totals.pageviews, MT.totals.timeOnSite
+--honnan hova keres?
+, MT.Honnan_Hungary, MT.Honnan_Kulfold, MT.Budapestrol_Budapestre, MT.Videkrol_Budapestre, MT.Kulfoldrol_Budapestre
+-- channel
+, MT.channel_Direct, MT.channel_Display, MT.channel_Email, MT.channel_Organic_Search, MT.channel_Paid_Search, MT.channel_Referral, MT.channel_Social
+-- kapcsolatfelvétel
+, MT.MaganIngyenesEmail, MT.MaganFizetosEmail, MT.OfficeNemUtcapontosEmail, MT.OfficeUtcapontosEmail, MT.Email, MT.MaganIngyenes, MT.MaganFizetos, MT.OfficeNemUtcapontos, MT.OfficeUtcapontos, MT.Office, MT.NR_TelszamFelfedes, MT.NR_Email
+
+FROM (
+      select icomid AS K_icomid
+      , COUNT(*) AS K_nr_diff_RE
+      , COUNT(DISTINCT DimHirdetesCity) AS K_nr_diff_City
+      , COUNT(DISTINCT DimHirdetesAltipus) AS K_nr_diff_Altipus
+      , COUNT(DISTINCT DimHirdetesMegye) AS K_nr_diff_Megye
+
+      , MIN(DimHirdetesAlapterulet) AS K_min_Alapterulet
+      , AVG(DimHirdetesAlapterulet) AS K_avg_Alapterulet
+      , MAX(DimHirdetesAlapterulet) AS K_max_Alapterulet
+      , STDDEV(DimHirdetesAlapterulet) AS K_std_Alapterulet
+
+      , MIN(DimHirdetesar) AS K_min_DimHirdetesar
+      , AVG(DimHirdetesar) AS K_avg_DimHirdetesar
+      , MAX(DimHirdetesar) AS K_max_DimHirdetesar
+      , STDDEV(DimHirdetesar) AS K_std_DimHirdetesar
+
+      , COUNT(CASE WHEN DimHirdetesMegye = 'Budapest' THEN DimHirdetesMegye END) AS K_nr_diff_RE_BP
+      , MIN(CASE WHEN DimHirdetesMegye = 'Budapest' THEN DimHirdetesar END) AS K_min_DimHirdetesar_BP
+      , AVG(CASE WHEN DimHirdetesMegye = 'Budapest' THEN DimHirdetesar END) AS K_avg_DimHirdetesar_BP
+      , MAX(CASE WHEN DimHirdetesMegye = 'Budapest' THEN DimHirdetesar END) AS K_max_DimHirdetesar_BP
+      , STDDEV(CASE WHEN DimHirdetesMegye = 'Budapest' THEN DimHirdetesar END) AS K_std_DimHirdetesar_BP
+
+      , SUM(CASE WHEN DimHirdetesMegye LIKE '%Budapest%' THEN 1 ELSE 0 END) AS Hol_Budapest
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Békéscsaba%' THEN 1 ELSE 0 END) AS Hol_Bekescsaba
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Debrecen%' THEN 1 ELSE 0 END) AS Hol_Debrecen
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Eger%' THEN 1 ELSE 0 END) AS Hol_Eger
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Gyõr%' THEN 1 ELSE 0 END) AS Hol_Gyor
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Kaposvár%' THEN 1 ELSE 0 END) AS Hol_Kaposvar
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Kecskemét%' THEN 1 ELSE 0 END) AS Hol_Kecskemet
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Miskolc%' THEN 1 ELSE 0 END) AS Hol_Miskolc
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Nyíregyháza%' THEN 1 ELSE 0 END) AS Hol_Nyiregyhaza
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Pécs%' THEN 1 ELSE 0 END) AS Hol_Pecs
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Salgótarján%' THEN 1 ELSE 0 END) AS Hol_Salgotarjan
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Szeged%' THEN 1 ELSE 0 END) AS Hol_Szeged
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Székesfehérvár%' THEN 1 ELSE 0 END) AS Hol_Szekesfehervar
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Szekszárd%' THEN 1 ELSE 0 END) AS Hol_Szekszard
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Szolnok%' THEN 1 ELSE 0 END) AS Hol_Szolnok
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Szombathely%' THEN 1 ELSE 0 END) AS Hol_Szombathely
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Tatabánya%' THEN 1 ELSE 0 END) AS Hol_Tatabanya
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Veszprém%' THEN 1 ELSE 0 END) AS Hol_Veszprem
+      , SUM(CASE WHEN DimHirdetesCity LIKE '%Zalaegerszeg%' THEN 1 ELSE 0 END) AS Hol_Zalaegerszeg
+      --
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%házrész%' THEN 1 ELSE 0 END) AS Mit_hazresz
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%könnyûszerkezetes%' THEN 1 ELSE 0 END) AS Mit_konnyuszerkezetes
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%családi ház%' THEN 1 ELSE 0 END) AS Mit_csaladi_haz
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%nyaralótelek%' THEN 1 ELSE 0 END) AS Mit_nyaralotelek
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%csúszózsalus%' THEN 1 ELSE 0 END) AS Mit_csuszozsalus
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%üdülõövezeti%' THEN 1 ELSE 0 END) AS Mit_uduloovezeti
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%tégla%' THEN 1 ELSE 0 END) AS Mit_tegla
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%hétvégi házas%' THEN 1 ELSE 0 END) AS Mit_hetvegi_hazas
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%kastély%' THEN 1 ELSE 0 END) AS Mit_kastely
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%lakóövezeti%' THEN 1 ELSE 0 END) AS Mit_lakoovezeti
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%sorház%' THEN 1 ELSE 0 END) AS Mit_sorhaz
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%üdülõházas%' THEN 1 ELSE 0 END) AS Mit_udulohazas
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%tanya%' THEN 1 ELSE 0 END) AS Mit_tanya
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%külterületi%' THEN 1 ELSE 0 END) AS Mit_kulteruleti
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%panel%' THEN 1 ELSE 0 END) AS Mit_panel
+      , SUM(CASE WHEN DimHirdetesAltipus LIKE '%ikerház%' THEN 1 ELSE 0 END) AS Mit_ikerhaz
+
+      from (
+        select icomid, DimHirdetesUtca, DimHirdetesVarosresz, DimHirdetesCity, DimHirdetesMegye, DimHirdetesAltipus, DimHirdetesEladasmodja, DimHirdetesTipus, DimHirdetesallapot
+        , INTEGER(DimHirdetesAlapterulet) AS DimHirdetesAlapterulet
+        , INTEGER(DimHirdetesar) AS DimHirdetesar
+        , MAX(A_hit_visitStartTime) AS MX_hit_visitStartTime
+        , MAX(A_visitNumber) AS MX_visitNumber
+        , MAX(A_hits_hitNumber) AS MX_hits_hitNumber
+        from [Gabor_EU.Lead_Hit_Magan_id_OOT]
+        where DimHirdetesTipus IS NOT NULL
+        and DimHirdetesMegye IS NOT NULL
+        and DimHirdetesTipus NOT IN ('telek', 'mezõgazdasági', 'fejlesztési terület', 'raktár', 'üzlethelyiség', 'iroda', 'intézmény', 'vendéglátás', '0', 'garázs', 'ipari')
+        and DimHirdetesAltipus NOT IN ('egyéb üzlethelyiség', 'vályogház')
+        and DimHirdetesEladasmodja = 'Eladó'
+        group by 1,2,3,4,5,6,7,8,9,10,11
+      --  order by 1,12,13,14,2,3,4,5,6,7,8,9,10,11
+      )A
+      GROUP BY 1
+
+)K
+
+left join (
+    select icomid AS BR_icomid
+    , SUM(NR_Bankracio) AS NR_Bankracio
+    , SUM(NR_Ujraszamol) AS NR_Ujraszamol
+    , SUM(NR_Lead) AS NR_Lead
+    , SUM(BR_Activity) AS BR_Activity
+    from [Gabor_EU.Lead_Hit_Magan_id_OOT]
+    group by 1
+)BR
+ON K_icomid = BR_icomid
+
+left join (
+
+  SELECT M_icomid
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' THEN 1 ELSE 0 END) AS Elado_Nr
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Sum_Ar
+  , AVG(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Avg_Ar
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetestelepules LIKE '%Budapest%' THEN 1 ELSE 0 END) AS Elado_Nr_Bp
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetestelepules LIKE '%Budapest%' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Sum_Ar_Bp
+  , AVG(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetestelepules LIKE '%Budapest%' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Avg_Ar_Bp
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'forró piac' THEN 1 ELSE 0 END) AS Elado_Nr_Piac_Forro
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'forró piac' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Sum_Ar_Piac_Forro
+  , AVG(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'forró piac' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Avg_Ar_Piac_Forro
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'likvid piac' THEN 1 ELSE 0 END) AS Elado_Nr_Piac_Likvid
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'likvid piac' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Sum_Ar_Piac_Likvid
+  , AVG(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'likvid piac' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Avg_Ar_Piac_Likvid
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'illikvid piac' THEN 1 ELSE 0 END) AS Elado_Nr_Piac_Illikvid
+  , SUM(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'illikvid piac' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Sum_Ar_Piac_Illikvid
+  , AVG(CASE WHEN A.DimMaganhirdetoHirdeteseladasmodja = 'eladó' AND A.DimMaganhirdetoHirdetespiacszegmens = 'illikvid piac' THEN INTEGER(A.DimMaganhirdetoHirdetesara) ELSE 0 END) AS Elado_Avg_Ar_Piac_Illikvid
+
+      FROM(
+          select A.*
+          , A.icomid AS M_icomid
+          from [Gabor_EU.Lead_Hit_Magan_id_OOT] A
+          inner join (
+            select icomid, DimMaganhirdetoHirdetestelepules, DimMaganhirdetoHirdeteseladasmodja
+            , MAX(A_date) AS MX_date
+            , MAX(A_visitId) AS MX_visitId
+            , MAX(A_hits_hitNumber) AS MX_hits_hitNumber
+            from [Gabor_EU.Lead_Hit_Magan_id_OOT] 
+            WHERE DimMaganhirdetoHirdetesara IS NOT NULL 
+            AND DimMaganhirdetoHirdeteseladasmodja = 'eladó'
+            GROUP BY 1,2,3
+            ORDER BY 1,2,3
+          )MX
+          ON A.icomid = MX.icomid
+          AND A.DimMaganhirdetoHirdetestelepules = MX.DimMaganhirdetoHirdetestelepules
+          AND A.DimMaganhirdetoHirdeteseladasmodja = MX.DimMaganhirdetoHirdeteseladasmodja
+          AND A.A_date = MX.MX_date
+          AND A.A_visitId = MX.MX_visitId
+          AND A.A_hits_hitNumber = MX.MX_hits_hitNumber
+     )A
+  GROUP BY 1
+
+)M
+ON M.M_icomid = K_icomid
+
+
+left join (
+    select icomid AS MT_icomid
+    --
+    , min(A_visitNumber) AS visitNumber_min
+    , max(A_visitNumber) AS visitNumber_max
+    , sum((A_totals_hits)) AS totals.hits
+    , sum((A_totals_pageviews)) AS totals.pageviews
+    , sum((A_totals_timeOnSite)) AS totals.timeOnSite
+    , SUM(CASE WHEN A_geoNetwork_country LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Honnan_Hungary
+    , SUM(CASE WHEN A_geoNetwork_country NOT LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Honnan_Kulfold
+    --honnan hova keres?
+    , SUM(CASE WHEN A_hits_page_pageTitle LIKE '%Budapest%' AND A_geoNetwork_city LIKE '%Budapest%' THEN 1 ELSE 0 END) AS Budapestrol_Budapestre
+    , SUM(CASE WHEN A_hits_page_pageTitle LIKE '%Budapest%' AND A_geoNetwork_city NOT LIKE '%Budapest%' AND A_geoNetwork_country LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Videkrol_Budapestre
+    , SUM(CASE WHEN A_hits_page_pageTitle LIKE '%Budapest%' AND A_geoNetwork_city NOT LIKE '%Budapest%' AND A_geoNetwork_country NOT LIKE '%Hungary%' THEN 1 ELSE 0 END) AS Kulfoldrol_Budapestre
+    -- channel
+    , SUM(CASE WHEN A_channelGrouping = 'Direct' THEN 1 ELSE 0 END) AS channel_Direct
+    , SUM(CASE WHEN A_channelGrouping = 'Display' THEN 1 ELSE 0 END) AS channel_Display
+    , SUM(CASE WHEN A_channelGrouping = 'Email' THEN 1 ELSE 0 END) AS channel_Email
+    , SUM(CASE WHEN A_channelGrouping = 'Organic Search' THEN 1 ELSE 0 END) AS channel_Organic_Search
+    , SUM(CASE WHEN A_channelGrouping = 'Paid Search' THEN 1 ELSE 0 END) AS channel_Paid_Search
+    , SUM(CASE WHEN A_channelGrouping = 'Referral' THEN 1 ELSE 0 END) AS channel_Referral
+    , SUM(CASE WHEN A_channelGrouping = 'Social' THEN 1 ELSE 0 END) AS channel_Social
+    -- Mail/telefon-felfedés
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('MaganIngyenesEmail') THEN 1 ELSE 0 END) AS MaganIngyenesEmail
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('MaganFizetosEmail') THEN 1 ELSE 0 END) AS MaganFizetosEmail
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('OfficeNemUtcapontosEmail') THEN 1 ELSE 0 END) AS OfficeNemUtcapontosEmail
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('OfficeUtcapontosEmail') THEN 1 ELSE 0 END) AS OfficeUtcapontosEmail
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('E-mail') THEN 1 ELSE 0 END) AS Email
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('MaganIngyenes') THEN 1 ELSE 0 END) AS MaganIngyenes
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('MaganFizetos') THEN 1 ELSE 0 END) AS MaganFizetos
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('OfficeNemUtcapontos') THEN 1 ELSE 0 END) AS OfficeNemUtcapontos
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('OfficeUtcapontos') THEN 1 ELSE 0 END) AS OfficeUtcapontos
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('Office') THEN 1 ELSE 0 END) AS Office
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('MaganIngyenes', 'MaganFizetos', 'OfficeNemUtcapontos', 'OfficeUtcapontos', 'Office') THEN 1 ELSE 0 END) AS NR_TelszamFelfedes
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction IN ('MaganIngyenesEmail', 'MaganFizetosEmail', 'OfficeNemUtcapontosEmail', 'OfficeUtcapontosEmail', 'E-mail') THEN 1 ELSE 0 END) AS NR_Email
+    from [Gabor_EU.Lead_Hit_Magan_id_OOT]
+    group by 1
+)MT
+ON K_icomid = MT_icomid
+
+

@@ -1,0 +1,28 @@
+#1 week performance period
+
+Load Information Values - Train - All
+```{r}
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_all.rda")
+```
+
+Load Information Values - Train - iv>0 variables
+```{r}
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_var_pos.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_pos.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IVdetails.rda")
+```
+
+
+#2 weeks performance period
+
+Load Information Values - Train - All
+```{r}
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_all_2w.rda")
+```
+
+Load Information Values - Train - iv>0 variables
+```{r}
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_var_pos_2w.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IV_train_pos_2w.rda")
+load("c:/Users/radics.gabor/Documents/icom/v07_Full_db_new/data/IVdetails_2w.rda")
+```

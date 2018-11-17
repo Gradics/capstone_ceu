@@ -1,0 +1,161 @@
+-- v08_032_variables_REsearch_ever
+-- select count(*) from [Gabor.v08_032_variables_REsearch_ever]
+
+select ID AS ID
+, COUNT(*) AS DIFF_RE
+-- alapterület
+, AVG(Alapterulet_MAX) AS AVG_Alapterulet
+, MIN(Alapterulet_MAX) AS MIN_Alapterulet
+, MAX(Alapterulet_MAX) AS MAX_Alapterulet
+-- ár
+, AVG(Hirdetesar_MAX) AS AVG_Hirdetesar
+, MIN(Hirdetesar_MAX) AS MIN_Hirdetesar
+, MAX(Hirdetesar_MAX) AS MAX_Hirdetesar
+-- átlagban hány visit/hit/képgaléria/(teljes leírás megtekintés) van ingatlanonként
+, AVG(DIFF_Visit) AS AVG_DIFF_Visit_per_RE
+, AVG(DIFF_Hit) AS AVG_DIFF_Hit_per_RE
+, AVG(Kepgaleria) AS AVG_Kepgaleria
+, AVG(Teljes_Leiras) AS AVG_Teljes_Leiras
+-- összesen hány visit/hit/képgaléria/(teljes leírás megtekintés) van ingatlanonként
+, SUM(DIFF_Visit) AS SUM_DIFF_Visit_per_RE
+, SUM(DIFF_Hit) AS SUM_DIFF_Hit_per_RE
+, SUM(Kepgaleria) AS SUM_Kepgaleria
+, SUM(Teljes_Leiras) AS SUM_Teljes_Leiras
+-- maximum hány visit/hit/képgaléria/(teljes leírás megtekintés) van ingatlanonként
+, MAX(DIFF_Visit) AS MAX_DIFF_Visit_per_RE
+, MAX(DIFF_Hit) AS MAX_DIFF_Hit_per_RE
+, MAX(Kepgaleria) AS MAX_Kepgaleria
+, MAX(Teljes_Leiras) AS MAX_Teljes_Leiras
+-- HirdetesTipus
+, SUM(CASE WHEN DimHirdetesTipus = 'ház' THEN 1 ELSE 0 END) AS haz
+, SUM(CASE WHEN DimHirdetesTipus = 'lakás' THEN 1 ELSE 0 END) AS lakas
+, SUM(CASE WHEN DimHirdetesTipus = 'nyaraló' THEN 1 ELSE 0 END) AS nyaralo
+-- HirdetesAltipus
+, SUM(CASE WHEN DimHirdetesAltipus = 'családi ház' THEN 1 ELSE 0 END) AS csaladi_haz
+, SUM(CASE WHEN DimHirdetesAltipus = 'tégla' THEN 1 ELSE 0 END) AS tegla
+, SUM(CASE WHEN DimHirdetesAltipus = 'panel' THEN 1 ELSE 0 END) AS panel
+, SUM(CASE WHEN DimHirdetesAltipus = 'ikerház' THEN 1 ELSE 0 END) AS ikerhaz
+, SUM(CASE WHEN DimHirdetesAltipus = 'hétvégi házas' THEN 1 ELSE 0 END) AS hetvegi_hazas
+, SUM(CASE WHEN DimHirdetesAltipus = 'sorház' THEN 1 ELSE 0 END) AS sorhaz
+, SUM(CASE WHEN DimHirdetesAltipus = 'házrész' THEN 1 ELSE 0 END) AS hazresz
+, SUM(CASE WHEN DimHirdetesAltipus = 'üdülõházas' THEN 1 ELSE 0 END) AS udulohazas
+, SUM(CASE WHEN DimHirdetesAltipus = 'csúszózsalus' THEN 1 ELSE 0 END) AS csuszozsalus
+, SUM(CASE WHEN DimHirdetesAltipus = 'tanya' THEN 1 ELSE 0 END) AS tanya
+, SUM(CASE WHEN DimHirdetesAltipus = 'kastély' THEN 1 ELSE 0 END) AS kastely
+, SUM(CASE WHEN DimHirdetesAltipus = 'nyaralótelek' THEN 1 ELSE 0 END) AS nyaralotelek
+, SUM(CASE WHEN DimHirdetesAltipus = 'könnyûszerkezetes' THEN 1 ELSE 0 END) AS konnyuszerkezetes
+, SUM(CASE WHEN DimHirdetesAltipus = 'vályogház' THEN 1 ELSE 0 END) AS valyoghaz
+-- Hirdetesallapot
+, SUM(CASE WHEN DimHirdetesallapot = 'jó állapotú' THEN 1 ELSE 0 END) AS jo_allapotu
+, SUM(CASE WHEN DimHirdetesallapot = 'újszerû' THEN 1 ELSE 0 END) AS ujszeru
+, SUM(CASE WHEN DimHirdetesallapot = 'felújított' THEN 1 ELSE 0 END) AS felujitott
+, SUM(CASE WHEN DimHirdetesallapot = 'közepes állapotú' THEN 1 ELSE 0 END) AS kozepes_allapotu
+, SUM(CASE WHEN DimHirdetesallapot = 'felújítandó' THEN 1 ELSE 0 END) AS felujitando
+-- HirdetesMegye
+, SUM(CASE WHEN DimHirdetesMegye = 'Budapest' THEN 1 ELSE 0 END) AS megye_Budapest
+, SUM(CASE WHEN DimHirdetesMegye = 'Pest' THEN 1 ELSE 0 END) AS megye_Pest
+, SUM(CASE WHEN DimHirdetesMegye = 'Veszprém' THEN 1 ELSE 0 END) AS megye_Veszprem
+, SUM(CASE WHEN DimHirdetesMegye = 'Somogy' THEN 1 ELSE 0 END) AS megye_Somogy
+, SUM(CASE WHEN DimHirdetesMegye = 'Hajdú-Bihar' THEN 1 ELSE 0 END) AS megye_Hajdu_Bihar
+, SUM(CASE WHEN DimHirdetesMegye = 'Fejér' THEN 1 ELSE 0 END) AS megye_Fejer
+, SUM(CASE WHEN DimHirdetesMegye = 'Gyõr-Moson-Sopron' THEN 1 ELSE 0 END) AS megye_GyorMS
+, SUM(CASE WHEN DimHirdetesMegye = 'Csongrád' THEN 1 ELSE 0 END) AS megye_Csongrad
+, SUM(CASE WHEN DimHirdetesMegye = 'Borsod-Abaúj-Zemplén' THEN 1 ELSE 0 END) AS megye_BAZ
+, SUM(CASE WHEN DimHirdetesMegye = 'Baranya' THEN 1 ELSE 0 END) AS megye_Baranya
+, SUM(CASE WHEN DimHirdetesMegye = 'Zala' THEN 1 ELSE 0 END) AS megye_Zala
+, SUM(CASE WHEN DimHirdetesMegye = 'Bács-Kiskun	' THEN 1 ELSE 0 END) AS megye_BacsK
+, SUM(CASE WHEN DimHirdetesMegye = 'Heves' THEN 1 ELSE 0 END) AS megye_Heves
+, SUM(CASE WHEN DimHirdetesMegye = 'Szabolcs-Szatmár-Bereg' THEN 1 ELSE 0 END) AS megye_SzSzB
+, SUM(CASE WHEN DimHirdetesMegye = 'Nógrád' THEN 1 ELSE 0 END) AS megye_Nograd
+, SUM(CASE WHEN DimHirdetesMegye = 'Komárom-Esztergom' THEN 1 ELSE 0 END) AS megye_Komarom_Esztregom
+, SUM(CASE WHEN DimHirdetesMegye = 'Jász-Nagykun-Szolnok' THEN 1 ELSE 0 END) AS megye_JNK
+, SUM(CASE WHEN DimHirdetesMegye = 'Vas' THEN 1 ELSE 0 END) AS megye_Vas
+, SUM(CASE WHEN DimHirdetesMegye = 'Békés' THEN 1 ELSE 0 END) AS megye_Bekes
+, SUM(CASE WHEN DimHirdetesMegye = 'Tolna' THEN 1 ELSE 0 END) AS megye_Tolna
+-- DimHirdetesCity kerület
+, SUM(CASE WHEN DimHirdetesCity = 'i-ker	' THEN 1 ELSE 0 END) AS ker_01
+, SUM(CASE WHEN DimHirdetesCity = 'ii-ker' THEN 1 ELSE 0 END) AS ker_02
+, SUM(CASE WHEN DimHirdetesCity = 'iii-ker' THEN 1 ELSE 0 END) AS ker_03
+, SUM(CASE WHEN DimHirdetesCity = 'iv-ker' THEN 1 ELSE 0 END) AS ker_04
+, SUM(CASE WHEN DimHirdetesCity = 'v-ker' THEN 1 ELSE 0 END) AS ker_05
+, SUM(CASE WHEN DimHirdetesCity = 'vi-ker' THEN 1 ELSE 0 END) AS ker_06
+, SUM(CASE WHEN DimHirdetesCity = 'vii-ker' THEN 1 ELSE 0 END) AS ker_07
+, SUM(CASE WHEN DimHirdetesCity = 'viii-ker	' THEN 1 ELSE 0 END) AS ker_08
+, SUM(CASE WHEN DimHirdetesCity = 'ix-ker' THEN 1 ELSE 0 END) AS ker_09
+, SUM(CASE WHEN DimHirdetesCity = 'x-ker' THEN 1 ELSE 0 END) AS ker_10
+, SUM(CASE WHEN DimHirdetesCity = 'xi-ker' THEN 1 ELSE 0 END) AS ker_11
+, SUM(CASE WHEN DimHirdetesCity = 'xii-ker' THEN 1 ELSE 0 END) AS ker_12
+, SUM(CASE WHEN DimHirdetesCity = 'xiii-ker' THEN 1 ELSE 0 END) AS ker_13
+, SUM(CASE WHEN DimHirdetesCity = 'xiv-ker' THEN 1 ELSE 0 END) AS ker_14
+, SUM(CASE WHEN DimHirdetesCity = 'xv-ker' THEN 1 ELSE 0 END) AS ker_15
+, SUM(CASE WHEN DimHirdetesCity = 'xvi-ker' THEN 1 ELSE 0 END) AS ker_16
+, SUM(CASE WHEN DimHirdetesCity = 'xvii-ker' THEN 1 ELSE 0 END) AS ker_17
+, SUM(CASE WHEN DimHirdetesCity = 'xviii-ker' THEN 1 ELSE 0 END) AS ker_18
+, SUM(CASE WHEN DimHirdetesCity = 'xix-ker' THEN 1 ELSE 0 END) AS ker_19
+, SUM(CASE WHEN DimHirdetesCity = 'xx-ker' THEN 1 ELSE 0 END) AS ker_20
+, SUM(CASE WHEN DimHirdetesCity = 'xxi-ker' THEN 1 ELSE 0 END) AS ker_21
+, SUM(CASE WHEN DimHirdetesCity = 'xxii-ker' THEN 1 ELSE 0 END) AS ker_22
+, SUM(CASE WHEN DimHirdetesCity = 'xxiii-ker	' THEN 1 ELSE 0 END) AS ker_23
+---- DimHirdetesCity város
+, SUM(CASE WHEN DimHirdetesCity = 'Debrecen' THEN 1 ELSE 0 END) AS Debrecen
+, SUM(CASE WHEN DimHirdetesCity = 'Szeged' THEN 1 ELSE 0 END) AS Szeged
+, SUM(CASE WHEN DimHirdetesCity = 'Pécs' THEN 1 ELSE 0 END) AS Pecs
+, SUM(CASE WHEN DimHirdetesCity = 'Érd' THEN 1 ELSE 0 END) AS Erd
+, SUM(CASE WHEN DimHirdetesCity = 'Miskolc' THEN 1 ELSE 0 END) AS Miskolc
+, SUM(CASE WHEN DimHirdetesCity = 'Siófok' THEN 1 ELSE 0 END) AS Siofok
+, SUM(CASE WHEN DimHirdetesCity = 'Budaörs' THEN 1 ELSE 0 END) AS Budaors
+, SUM(CASE WHEN DimHirdetesCity = 'Szentendre' THEN 1 ELSE 0 END) AS Szentendre
+, SUM(CASE WHEN DimHirdetesCity = 'Nyíregyháza' THEN 1 ELSE 0 END) AS Nyiregyhaza
+, SUM(CASE WHEN DimHirdetesCity = 'Székesfehérvár' THEN 1 ELSE 0 END) AS Szekesfehervar
+, SUM(CASE WHEN DimHirdetesCity = 'Kecskemét' THEN 1 ELSE 0 END) AS Kecskemet
+, SUM(CASE WHEN DimHirdetesCity = 'Szigetszentmiklós' THEN 1 ELSE 0 END) AS SzSzentmiklos
+, SUM(CASE WHEN DimHirdetesCity = 'Sopron' THEN 1 ELSE 0 END) AS Sopron
+, SUM(CASE WHEN DimHirdetesCity = 'Veszprém' THEN 1 ELSE 0 END) AS Veszprem
+, SUM(CASE WHEN DimHirdetesCity = 'Eger' THEN 1 ELSE 0 END) AS Eger
+, SUM(CASE WHEN DimHirdetesCity = 'Gödöllõ' THEN 1 ELSE 0 END) AS Godollo
+, SUM(CASE WHEN DimHirdetesCity = 'Balatonalmádi' THEN 1 ELSE 0 END) AS BAlmadi
+, SUM(CASE WHEN DimHirdetesCity = 'Veresegyház' THEN 1 ELSE 0 END) AS Veresegyhaz
+, SUM(CASE WHEN DimHirdetesCity = 'Balatonfüred' THEN 1 ELSE 0 END) AS BFured
+, SUM(CASE WHEN DimHirdetesCity = 'Vác' THEN 1 ELSE 0 END) AS Vac
+, SUM(CASE WHEN DimHirdetesCity = 'Budakeszi' THEN 1 ELSE 0 END) AS Budakeszi
+, SUM(CASE WHEN DimHirdetesCity = 'Kaposvár' THEN 1 ELSE 0 END) AS Kaposvar
+, SUM(CASE WHEN DimHirdetesCity = 'Szolnok' THEN 1 ELSE 0 END) AS Szolnok
+, SUM(CASE WHEN DimHirdetesCity = 'Göd' THEN 1 ELSE 0 END) AS God
+, SUM(CASE WHEN DimHirdetesCity = 'Fót' THEN 1 ELSE 0 END) AS Fot
+, SUM(CASE WHEN DimHirdetesCity = 'Dunaharaszti' THEN 1 ELSE 0 END) AS Dunaharaszti
+
+from (
+
+    select ID
+    , REPLACE(A_hits_page_pagePathLevel1, '/', '') AS RE_ID
+
+    , MIN(INTEGER(DimHirdetesAlapterulet)) AS Alapterulet_MIN
+    , MAX(INTEGER(DimHirdetesAlapterulet)) AS Alapterulet_MAX
+    , MIN(INTEGER(DimHirdetesar)) AS Hirdetesar_MIN
+    , MAX(INTEGER(DimHirdetesar)) AS Hirdetesar_MAX
+
+    , MAX(DimHirdetesCity) AS DimHirdetesCity
+    , MAX(DimHirdetesMegye) AS DimHirdetesMegye
+    , MAX(DimHirdetesAltipus) AS DimHirdetesAltipus
+    , MAX(DimHirdetesEladasmodja) AS DimHirdetesEladasmodja
+    , MAX(DimHirdetesTipus) AS DimHirdetesTipus
+    , MAX(DimHirdetesallapot) AS DimHirdetesallapot
+
+    , COUNT(DISTINCT A_visitNumber) AS DIFF_Visit
+    , COUNT(DISTINCT A_hits_hitNumber) AS DIFF_Hit
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction = 'Kepgaleria' THEN 1 ELSE 0 END) AS Kepgaleria
+    , SUM(CASE WHEN A_hits_eventInfo_eventAction = 'Teljes leírás' THEN 1 ELSE 0 END) AS Teljes_Leiras
+
+    FROM [Gabor.v08_02_Hit_All]
+    WHERE A_hit_visitStartTime_yyyymmdd <= '2018-02-04'
+    AND DimHirdetesEladasmodja = 'Eladó'
+    AND INTEGER(REPLACE(A_hits_page_pagePathLevel1, '/', '')) > 0
+    AND DimHirdetesTipus IN ('ház', 'lakás', 'nyaraló', 'garázs', 'telek')
+
+    GROUP BY 1,2
+
+    )A
+    
+GROUP BY 1    
+
+

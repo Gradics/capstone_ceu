@@ -1,0 +1,184 @@
+---
+title: "Mortgage Lead Model"
+author: "Radics, Gabor"
+date: '2018-02-19'
+output:
+  html_notebook:
+    df_print: paged
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+subtitle: Model Summary - 2 weeks
+---
+
+# 2 weeks
+
+Summary of models' performance
+```{r echo=FALSE}
+B_resamps_2w <- resamples(list("m00_2w_logit_base" = m00_2w_logit_base
+                            #, "m01_2w_logit_all" = m01_2w_logit_all
+                            , "m02_2w_logit_penalized" = m02_2w_logit_penalized
+                            , "m03_2w_rpart" = m03_2w_rpart
+                            , "m04_2w_RF" = m04_2w_RF
+                            , "m05_2w_pcr" = m05_2w_pcr
+                            , "m06_2w_GBM" = m06_2w_GBM
+                            
+                            , "m10_2w_logit_base_factor" = m10_2w_logit_base_factor
+                            #, "m11_2w_logit_all_factor" = m11_2w_logit_all_factor
+                            , "m12_2w_logit_penalized_facor" = m12_2w_logit_penalized_facor
+                            , "m13_2w_rpart_factor" = m13_2w_rpart_factor
+                            , "m14_2w_RF_factor" = m14_2w_RF_factor
+                            , "m15_2w_pcr_factor" = m15_2w_pcr_factor
+                            , "m16_2w_GBM_factor" = m16_2w_GBM_factor
+                            
+                            , "m20_2w_logit_base_log" = m20_2w_logit_base_log
+                            #, "m21_2w_logit_all_log" = m21_2w_logit_all_log
+                            , "m22_2w_logit_penalized_log" = m22_2w_logit_penalized_log
+                            , "m23_2w_rpart_log" = m23_2w_rpart_log
+                            , "m24_2w_RF_log" = m24_2w_RF_log
+                            , "m25_2w_pcr_log" = m25_2w_pcr_log
+                            , "m26_2w_GBM_log" = m26_2w_GBM_log
+))
+
+ROC_summary_2w <- data.table(rbind(
+  c('CV', summary(B_resamps_2w)$statistics$ROC[,4])
+  , c('Test'
+      , m00_2w_AUC_test
+      #, m01_2w_AUC_test
+      , m02_2w_AUC_test
+      , m03_2w_AUC_test
+      , m04_2w_AUC_test
+      , m05_2w_AUC_test
+      , m06_2w_AUC_test
+      
+      , m10_2w_AUC_test
+      #, m11_2w_AUC_test
+      , m12_2w_AUC_test
+      , m13_2w_AUC_test
+      , m14_2w_AUC_test
+      , m15_2w_AUC_test
+      , m16_2w_AUC_test
+      
+      , m20_2w_AUC_test
+      #, m21_2w_AUC_test
+      , m22_2w_AUC_test
+      , m23_2w_AUC_test
+      , m24_2w_AUC_test
+      , m25_2w_AUC_test
+      , m26_2w_AUC_test
+      )
+  , c('External'
+      , m00_2w_AUC_external
+      #, m01_2w_AUC_external
+      , m02_2w_AUC_external
+      , m03_2w_AUC_external
+      , m04_2w_AUC_external
+      , m05_2w_AUC_external
+      , m06_2w_AUC_external
+      
+      , m10_2w_AUC_external
+      #, m11_2w_AUC_external
+      , m12_2w_AUC_external
+      , m13_2w_AUC_external
+      , m14_2w_AUC_external
+      , m15_2w_AUC_external
+      , m16_2w_AUC_external
+      
+      , m20_2w_AUC_external
+      #, m21_2w_AUC_external
+      , m22_2w_AUC_external
+      , m23_2w_AUC_external
+      , m24_2w_AUC_external
+      , m25_2w_AUC_external
+      , m26_2w_AUC_external
+      )
+  ))
+
+colnames(ROC_summary_2w) <- c("dataset"
+                           , "m00_2w_logit_base"
+                           #, "m01_2w_logit_all"
+                           , "m02_2w_logit_penalized"
+                           , "m03_2w_rpart"
+                           , "m04_2w_RF"
+                           , "m05_2w_pcr"
+                           , "m06_2w_GBM"
+                           
+                           , "m10_2w_logit_base_factor"
+                           #, "m11_2w_logit_all_factor"
+                           , "m12_2w_logit_penalized_facor"
+                           , "m13_2w_rpart_factor"
+                           , "m14_2w_RF_factor"
+                           , "m15_2w_pcr_factor"
+                           , "m16_2w_GBM_factor"
+                           
+                           , "m20_2w_logit_base_log"
+                           #, "m21_2w_logit_all_log"
+                           , "m22_2w_logit_penalized_log"
+                           , "m23_2w_rpart_log"
+                           , "m24_2w_RF_log"
+                           , "m25_2w_pcr_log"
+                           , "m26_2w_GBM_log"
+                           )
+
+ROC_summary_2w[,`:=`(
+  m00_2w_logit_base = as.numeric(specify_decimal(as.numeric(m00_2w_logit_base), 4)),
+  #m01_2w_logit_all = as.numeric(specify_decimal(as.numeric(m01_2w_logit_all), 4)),
+  m02_2w_logit_penalized = as.numeric(specify_decimal(as.numeric(m02_2w_logit_penalized), 4)),
+  m03_2w_rpart = as.numeric(specify_decimal(as.numeric(m03_2w_rpart), 4)),
+  m04_2w_RF = as.numeric(specify_decimal(as.numeric(m04_2w_RF), 4)),
+  m05_2w_pcr = as.numeric(specify_decimal(as.numeric(m05_2w_pcr), 4)),
+  m06_2w_GBM = as.numeric(specify_decimal(as.numeric(m06_2w_GBM), 4)),
+  
+  m10_2w_logit_base_factor = as.numeric(specify_decimal(as.numeric(m10_2w_logit_base_factor), 4)),
+  #m11_2w_logit_all_factor = as.numeric(specify_decimal(as.numeric(m11_2w_logit_all_factor), 4)),
+  m12_2w_logit_penalized_facor = as.numeric(specify_decimal(as.numeric(m12_2w_logit_penalized_facor), 4)),
+  m13_2w_rpart_factor = as.numeric(specify_decimal(as.numeric(m13_2w_rpart_factor), 4)),
+  m14_2w_RF_factor = as.numeric(specify_decimal(as.numeric(m14_2w_RF_factor), 4)),
+  m15_2w_pcr_factor = as.numeric(specify_decimal(as.numeric(m15_2w_pcr_factor), 4)),
+  m16_2w_GBM_factor = as.numeric(specify_decimal(as.numeric(m16_2w_GBM_factor), 4)),
+  
+  m20_2w_logit_base_log = as.numeric(specify_decimal(as.numeric(m20_2w_logit_base_log), 4)),
+  #m21_2w_logit_all_log = as.numeric(specify_decimal(as.numeric(m21_2w_logit_all_log), 4)),
+  m22_2w_logit_penalized_log = as.numeric(specify_decimal(as.numeric(m22_2w_logit_penalized_log), 4)),
+  m23_2w_rpart_log = as.numeric(specify_decimal(as.numeric(m23_2w_rpart_log), 4)),
+  m24_2w_RF_log = as.numeric(specify_decimal(as.numeric(m24_2w_RF_log), 4)),
+  m25_2w_pcr_log = as.numeric(specify_decimal(as.numeric(m25_2w_pcr_log), 4)),
+  m26_2w_GBM_log = as.numeric(specify_decimal(as.numeric(m26_2w_GBM_log), 4))
+)]
+
+ROC_summary_2w <- dcast(melt(ROC_summary_2w, id.vars = "dataset"), variable ~ dataset)
+
+ROC_summary_2w
+```
+
+deleting what is not needed
+```{r}
+# continuous
+rm(m00_2w_logit_base)
+# rm(m01_2w_logit_all)
+rm(m02_2w_logit_penalized)
+rm(m03_2w_rpart)
+rm(m04_2w_RF)
+rm(m05_2w_pcr)
+rm(m06_2w_GBM)
+
+# factor
+rm(m10_2w_logit_base_factor)
+# rm(m11_2w_logit_all_factor)
+rm(m12_2w_logit_penalized_facor)
+rm(m13_2w_rpart_factor)
+rm(m14_2w_RF_factor)
+rm(m15_2w_pcr_factor)
+rm(m16_2w_GBM_factor)
+
+# log
+rm(m20_2w_logit_base_log)
+# rm(m21_2w_logit_all_log)
+rm(m22_2w_logit_penalized_log)
+rm(m23_2w_rpart_log)
+rm(m24_2w_RF_log)
+rm(m25_2w_pcr_log)
+rm(m26_2w_GBM_log)
+```
+

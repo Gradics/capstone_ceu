@@ -1,0 +1,16 @@
+-- Lead_Hit_Magan_id
+-- don't use Legacy SQL
+
+select i.icomid, A.*
+from `Gabor_EU.Lead_Hit_Magan` A
+left join (
+  select A_fullVisitorId AS fullVisitorId
+  , MAX(DimbusinessPartnerId) AS icomid
+  from `Gabor_EU.Lead_Hit_Magan`
+  group by 1
+)i
+on A.A_fullVisitorId = i.fullVisitorId
+
+
+
+

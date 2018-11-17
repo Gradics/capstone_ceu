@@ -1,0 +1,93 @@
+
+Saving copy of the data
+```{r}
+JZ_train <- data.table(JZ_import_1)
+JZ_test <- data.table(JZ_import_2)
+JZ_external <- data.table(JZ_external_1)
+```
+
+Dropping Original Tables
+```{r}
+rm(JZ_import_1, JZ_import_2, JZ_external_1)
+```
+
+
+Data cleaning
+```{r}
+# Replace missing values with 0
+JZ_train[is.na(JZ_train)] <- 0
+JZ_test[is.na(JZ_test)] <- 0
+JZ_external[is.na(JZ_external)] <- 0
+```
+
+
+Performance definition - Train
+```{r}
+JZ_train <- JZ_train[, `:=`(b_perf_JZ_Kinyitas = ifelse(perf_JZ_Kinyitas > 0, 1, 0)
+                            , b_perf_JZ_Ujraszamol = ifelse(perf_JZ_Ujraszamol > 0, 1, 0)
+                            , b_perf_BR_Kalkulator = ifelse(perf_BR_Kalkulator > 0, 1, 0)
+                            , b_perf_JZ_Lead = ifelse(perf_JZ_Lead > 0, 1, 0)
+                            , b_perf_BR_Konverzio = ifelse(perf_BR_Konverzio > 0, 1, 0)
+                            , b_perf2w_JZ_Kinyitas = ifelse(perf2w_JZ_Kinyitas > 0, 1, 0)
+                            , b_perf2w_JZ_Ujraszamol = ifelse(perf2w_JZ_Ujraszamol > 0, 1, 0)
+                            , b_perf2w_BR_Kalkulator = ifelse(perf2w_BR_Kalkulator > 0, 1, 0)
+                            , b_perf2w_JZ_Lead = ifelse(perf2w_JZ_Lead > 0, 1, 0)
+                            , b_perf2w_BR_Konverzio = ifelse(perf2w_BR_Konverzio > 0, 1, 0)
+                            ),]
+
+JZ_train$n_Target <- as.numeric(ifelse(JZ_train$b_perf_JZ_Ujraszamol + JZ_train$b_perf_BR_Kalkulator > 0, 1, 0))
+JZ_train$f_Target <- as.factor(ifelse(JZ_train$n_Target > 0, 'Y', 'N'))
+JZ_train[,.N,keyby=.(f_Target)]
+
+JZ_train$n_Target_2w <- as.numeric(ifelse(JZ_train$b_perf2w_JZ_Ujraszamol + JZ_train$b_perf2w_BR_Kalkulator > 0, 1, 0))
+JZ_train$f_Target_2w <- as.factor(ifelse(JZ_train$n_Target_2w > 0, 'Y', 'N'))
+JZ_train[,.N,keyby=.(f_Target_2w)]
+
+```
+
+Performance definition - Test
+```{r}
+JZ_test <- JZ_test[, `:=`(b_perf_JZ_Kinyitas = ifelse(perf_JZ_Kinyitas > 0, 1, 0)
+                            , b_perf_JZ_Ujraszamol = ifelse(perf_JZ_Ujraszamol > 0, 1, 0)
+                            , b_perf_BR_Kalkulator = ifelse(perf_BR_Kalkulator > 0, 1, 0)
+                            , b_perf_JZ_Lead = ifelse(perf_JZ_Lead > 0, 1, 0)
+                            , b_perf_BR_Konverzio = ifelse(perf_BR_Konverzio > 0, 1, 0)
+                            , b_perf2w_JZ_Kinyitas = ifelse(perf2w_JZ_Kinyitas > 0, 1, 0)
+                            , b_perf2w_JZ_Ujraszamol = ifelse(perf2w_JZ_Ujraszamol > 0, 1, 0)
+                            , b_perf2w_BR_Kalkulator = ifelse(perf2w_BR_Kalkulator > 0, 1, 0)
+                            , b_perf2w_JZ_Lead = ifelse(perf2w_JZ_Lead > 0, 1, 0)
+                            , b_perf2w_BR_Konverzio = ifelse(perf2w_BR_Konverzio > 0, 1, 0)
+                            ),]
+
+JZ_test$n_Target <- as.numeric(ifelse(JZ_test$b_perf_JZ_Ujraszamol + JZ_test$b_perf_BR_Kalkulator > 0, 1, 0))
+JZ_test$f_Target <- as.factor(ifelse(JZ_test$n_Target > 0, 'Y', 'N'))
+JZ_test[,.N,keyby=.(f_Target)]
+
+JZ_test$n_Target_2w <- as.numeric(ifelse(JZ_test$b_perf2w_JZ_Ujraszamol + JZ_test$b_perf2w_BR_Kalkulator > 0, 1, 0))
+JZ_test$f_Target_2w <- as.factor(ifelse(JZ_test$n_Target_2w > 0, 'Y', 'N'))
+JZ_test[,.N,keyby=.(f_Target_2w)]
+```
+
+Performance definition - External
+```{r}
+JZ_external <- JZ_external[, `:=`(b_perf_JZ_Kinyitas = ifelse(perf_JZ_Kinyitas > 0, 1, 0)
+                            , b_perf_JZ_Ujraszamol = ifelse(perf_JZ_Ujraszamol > 0, 1, 0)
+                            , b_perf_BR_Kalkulator = ifelse(perf_BR_Kalkulator > 0, 1, 0)
+                            , b_perf_JZ_Lead = ifelse(perf_JZ_Lead > 0, 1, 0)
+                            , b_perf_BR_Konverzio = ifelse(perf_BR_Konverzio > 0, 1, 0)
+                            , b_perf2w_JZ_Kinyitas = ifelse(perf2w_JZ_Kinyitas > 0, 1, 0)
+                            , b_perf2w_JZ_Ujraszamol = ifelse(perf2w_JZ_Ujraszamol > 0, 1, 0)
+                            , b_perf2w_BR_Kalkulator = ifelse(perf2w_BR_Kalkulator > 0, 1, 0)
+                            , b_perf2w_JZ_Lead = ifelse(perf2w_JZ_Lead > 0, 1, 0)
+                            , b_perf2w_BR_Konverzio = ifelse(perf2w_BR_Konverzio > 0, 1, 0)
+                            ),]
+
+JZ_external$n_Target <- as.numeric(ifelse(JZ_external$b_perf_JZ_Ujraszamol + JZ_external$b_perf_BR_Kalkulator > 0, 1, 0))
+JZ_external$f_Target <- as.factor(ifelse(JZ_external$n_Target > 0, 'Y', 'N'))
+JZ_external[,.N,keyby=.(f_Target)]
+
+JZ_external$n_Target_2w <- as.numeric(ifelse(JZ_external$b_perf2w_JZ_Ujraszamol + JZ_external$b_perf2w_BR_Kalkulator > 0, 1, 0))
+JZ_external$f_Target_2w <- as.factor(ifelse(JZ_external$n_Target_2w > 0, 'Y', 'N'))
+JZ_external[,.N,keyby=.(f_Target_2w)]
+```
+
